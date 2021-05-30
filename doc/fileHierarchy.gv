@@ -1,0 +1,11 @@
+digraph G {
+  "packet" -> "dagState";
+  "packet" -> "SCH";
+
+  "dagState" -> "state";
+  "obuf" -> "state";
+  "SCH" -> "state";
+
+  "state" -> "simu";
+}
+
