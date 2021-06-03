@@ -13,15 +13,12 @@
   (all-from-out "packet.rkt"))
 
 
-(struct SCH_t (cycleForNext) #:mutable #:transparent)
-(define (initSCH) (SCH_t (make-hash)))
-
-
-(define INIT_CYCLE 3)
+(struct SCH_t (cycleForNext interval) #:mutable #:transparent)
+(define (initSCH interval) (SCH_t (make-hash) interval))
 
 
 (define (updateWithReq SCH packet)
-  (hash-set! (SCH_t-cycleForNext SCH) packet INIT_CYCLE))
+  (hash-set! (SCH_t-cycleForNext SCH) packet (SCH_t-interval SCH)))
 
 (define (updateClk_SCH SCH)
   (define (countDown key value)
@@ -56,7 +53,7 @@
 
 
 (define (testMe)
-  (define SCH (initSCH))
+  (define SCH (initSCH 3))
 
   (println (willAccept SCH #t #f))
   (println "-------------------")

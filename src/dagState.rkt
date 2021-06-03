@@ -12,12 +12,8 @@
   (all-from-out "packet.rkt"))
 
 
-(struct dagState_t (cycleForNext coreID) #:mutable #:transparent)
-(define (initDagState coreID) (dagState_t 0 coreID))
-
-
-(define INIT_CYCLE 3)
-
+(struct dagState_t (cycleForNext coreID interval nodeID) #:mutable #:transparent)
+(define (initDagState coreID interval) (dagState_t 0 coreID interval 0))
 
 
 (define (updateWithResp dagState nodeID)
@@ -25,17 +21,19 @@
 
 (define (updateClk_dag dagState)
   (if (equal? 0 (dagState_t-cycleForNext dagState))
-    (set-dagState_t-cycleForNext! dagState INIT_CYCLE)
+    (set-dagState_t-cycleForNext! dagState (dagState_t-interval dagState))
     (set-dagState_t-cycleForNext! dagState (- (dagState_t-cycleForNext dagState) 1))))
 
 (define (getReq dagState)
   (if (equal? 0 (dagState_t-cycleForNext dagState))
-    (packet_t (dagState_t-coreID dagState) 0 0 0)
+    (begin
+      (set-dagState_t-nodeID! dagState (+ 1 (dagState_t-nodeID dagState)))
+      (packet_t (dagState_t-coreID dagState) (dagState_t-nodeID dagState) 0 0))
     (void)))
 
 
 (define (testMe)
-  (define dagState (initDagState core_SH))
+  (define dagState (initDagState core_SH 3))
   (updateWithResp dagState 11111)
 
   (println (getReq dagState))

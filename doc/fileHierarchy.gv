@@ -4,8 +4,10 @@ digraph G {
 
   "dagState" -> "state";
   "obuf" -> "state";
+  "nodeMap" -> "state";
   "SCH" -> "state";
 
   "state" -> "simu";
+  "observe" -> "simu";
 }
 
