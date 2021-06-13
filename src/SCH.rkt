@@ -1,4 +1,5 @@
 #lang rosette
+; rosette? rosette/safe?
 
 (require "packet.rkt")
 
@@ -12,9 +13,10 @@
   
   (all-from-out "packet.rkt"))
 
-
+; different name for different purpose
 (struct SCH_t (cycleForNext interval) #:mutable #:transparent)
 (define (initSCH interval) (SCH_t (make-hash) interval))
+; rosette crash at hash funciton example
 
 
 (define (updateWithReq SCH packet)
@@ -32,6 +34,7 @@
 (define (willAccept SCH req_SH req_RC)
   (list req_SH req_RC))
 
+; check serval how distinguish type and instance
 (define (getResp SCH)
   (define (getSH key value)
     (if (and (equal? core_SH (packet_t-coreID key)) (equal? 0 value))
@@ -82,5 +85,5 @@
   (println SCH)
   (println "-------------------"))
 
-(testMe)
+;(testMe)
 

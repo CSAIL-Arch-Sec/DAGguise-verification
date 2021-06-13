@@ -32,5 +32,5 @@
   (println (extractTR nodeMap 3))
   (println nodeMap))
 
-(testMe)
+;(testMe)
 

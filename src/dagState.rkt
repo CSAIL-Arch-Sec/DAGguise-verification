@@ -11,11 +11,12 @@
   
   (all-from-out "packet.rkt"))
 
-
+; comments are important for struct 
+; check the convension of comments
 (struct dagState_t (cycleForNext coreID interval nodeID) #:mutable #:transparent)
 (define (initDagState coreID interval) (dagState_t 0 coreID interval 0))
 
-
+; add !
 (define (updateWithResp dagState nodeID)
   (void))
 
@@ -47,4 +48,4 @@
   (println (getReq dagState))
   (updateClk_dag dagState))
 
-(testMe)
+;(testMe)

@@ -47,7 +47,12 @@
       (not (equal? (void) (getHead obuf_SH)))
       (not (equal? (void) (getHead obuf_RC)))))
   (if accept_SH (updateWithReq SCH (pop obuf_SH)) (void))
+  (println obuf_RC)
+  (println accept_RC)
+  (println SCH)
   (if accept_RC (updateWithReq SCH (pop obuf_RC)) (void))
+  (println SCH)
+  ; a ui for debugging
 
   ; SCH to SH/RC
   (match-define (list resp_SH resp_RC) (getResp SCH))
@@ -83,5 +88,5 @@
   (define observe (initObserve))
   (simu state observe 100))
 
-(testMe)
+;(testMe)
 

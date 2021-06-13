@@ -30,5 +30,5 @@
   (addLog observe 100)
   (println (getLog observe)))
 
-(testMe)
+;(testMe)
 
