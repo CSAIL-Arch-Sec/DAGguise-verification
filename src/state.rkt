@@ -4,29 +4,29 @@
   "dagState.rkt"
   "obuf.rkt"
   "nodeMap.rkt"
-  "SCH.rkt")
+  "scheduler.rkt")
 
 (provide
-  initState
-  (struct-out state_t)
+  init-state
+  (struct-out state)
   (all-from-out "dagState.rkt")
   (all-from-out "obuf.rkt")
   (all-from-out "nodeMap.rkt")
-  (all-from-out "SCH.rkt"))
+  (all-from-out "scheduler.rkt"))
 
 
-(struct state_t 
+(struct state 
   (
     clk
     dagState_TR obuf_TR 
     dagState_SH obuf_SH nodeMap
     dagState_RC obuf_RC 
-    SCH)
+    scheduler)
   #:mutable #:transparent)
-(define (initState interval_TR interval_SH interval_RC interval_SCH) (state_t
+(define (init-state interval_TR interval_SH interval_RC interval_SCH) (state
   0
-  (initDagState core_SH interval_TR) (initObuf)
-  (initDagState core_SH interval_SH) (initObuf) (initNodeMap)
-  (initDagState core_RC interval_RC) (initObuf)
-  (initSCH interval_SCH)))
+  (init-dagState core_SH interval_TR) (init-obuf)
+  (init-dagState core_SH interval_SH) (init-obuf) (init-nodeMap)
+  (init-dagState core_RC interval_RC) (init-obuf)
+  (init-scheduler interval_SCH)))
 

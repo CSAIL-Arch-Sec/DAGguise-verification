@@ -1,12 +1,12 @@
 #lang rosette
 
 (provide
-  (struct-out packet_t)
+  (struct-out packet)
   core_SH
   core_RC)
 
 
-(struct packet_t (coreID nodeID address tag) #:mutable #:transparent)
+(struct packet (coreID nodeID address tag) #:mutable #:transparent)
 
 
 (define core_SH 0)

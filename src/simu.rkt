@@ -2,27 +2,27 @@
 
 (require
   "state.rkt"
-  "observe.rkt")
+  "observation.rkt")
 
 (provide
   simu)
 
 
-(define (simu state observe MAXCLK)
+(define (simu state observation MAXCLK)
   ; nickname (NOTE: this will not be updated within this clk)
-  (define clk (state_t-clk state))
-  (define dagState_TR (state_t-dagState_TR state))
-  (define obuf_TR (state_t-obuf_TR state))
-  (define dagState_SH (state_t-dagState_SH state))
-  (define obuf_SH (state_t-obuf_SH state))
-  (define nodeMap (state_t-nodeMap state))
-  (define dagState_RC (state_t-dagState_RC state))
-  (define obuf_RC (state_t-obuf_RC state))
-  (define SCH (state_t-SCH state))
+  (define clk (state-clk state))
+  (define dagState_TR (state-dagState_TR state))
+  (define obuf_TR (state-obuf_TR state))
+  (define dagState_SH (state-dagState_SH state))
+  (define obuf_SH (state-obuf_SH state))
+  (define nodeMap (state-nodeMap state))
+  (define dagState_RC (state-dagState_RC state))
+  (define obuf_RC (state-obuf_RC state))
+  (define scheduler (state-scheduler state))
 
   ; in TR
   (let ([packet (getReq dagState_TR)])
-    (if (equal? (void) packet) (void) (push obuf_TR packet)))
+    (if (equal? (void) packet) (void) (push! obuf_TR packet)))
 
   ; TR to SH
   (let [(packet_SH (getReq dagState_SH))]
@@ -30,63 +30,62 @@
       (void)
       (begin
         (if (and (not (equal? (void) (getHead obuf_TR)))
-                 (equal? (packet_t-tag (getHead obuf_TR)) (packet_t-tag packet_SH)))
-          (let ([packet_TR (pop obuf_TR)])
-            (set-packet_t-address! packet_SH (packet_t-address packet_TR))
-            (addTR nodeMap (packet_t-nodeID packet_TR) (packet_t-nodeID packet_SH)))
+                 (equal? (packet-tag (getHead obuf_TR)) (packet-tag packet_SH)))
+          (let ([packet_TR (pop! obuf_TR)])
+            (set-packet-address! packet_SH (packet-address packet_TR))
+            (addTR! nodeMap (packet-nodeID packet_TR) (packet-nodeID packet_SH)))
           (void))
-        (push obuf_SH packet_SH))))
+        (push! obuf_SH packet_SH))))
 
   ; in RC
   (let ([packet (getReq dagState_RC)])
-    (if (equal? (void) packet) (void) (push obuf_RC packet)))
+    (if (equal? (void) packet) (void) (push! obuf_RC packet)))
 
-  ; SH/RC to SCH
+  ; SH/RC to scheduler
   (match-define (list accept_SH accept_RC)
-    (willAccept SCH
+    (willAccept scheduler
       (not (equal? (void) (getHead obuf_SH)))
       (not (equal? (void) (getHead obuf_RC)))))
-  (if accept_SH (updateWithReq SCH (pop obuf_SH)) (void))
+  (if accept_SH (updateWithReq! scheduler (pop! obuf_SH)) (void))
   (println obuf_RC)
   (println accept_RC)
-  (println SCH)
-  (if accept_RC (updateWithReq SCH (pop obuf_RC)) (void))
-  (println SCH)
-  ; a ui for debugging
+  (println scheduler)
+  (if accept_RC (updateWithReq! scheduler (pop! obuf_RC)) (void))
+  (println scheduler)
 
-  ; SCH to SH/RC
-  (match-define (list resp_SH resp_RC) (getResp SCH))
+  ; scheduler to SH/RC
+  (match-define (list resp_SH resp_RC) (getResp scheduler))
   (if (equal? (void) resp_SH)
     (void)
     (begin
-      (updateWithResp dagState_SH (packet_t-nodeID resp_SH))
-      (let ([nodeID_TR (extractTR nodeMap (packet_t-nodeID resp_SH))])
+      (updateWithResp! dagState_SH (packet-nodeID resp_SH))
+      (let ([nodeID_TR (extractTR! nodeMap (packet-nodeID resp_SH))])
         (if (equal? (void) nodeID_TR)
           (void)
-          (updateWithResp dagState_SH nodeID_TR)))))
+          (updateWithResp! dagState_SH nodeID_TR)))))
   (if (equal? (void) resp_RC)
     (void)
     (begin
-      (updateWithResp dagState_RC (packet_t-nodeID resp_RC))
-      (addLog observe clk)))
+      (updateWithResp! dagState_RC (packet-nodeID resp_RC))
+      (addLog! observation clk)))
 
   ; update clk
-  (set-state_t-clk! state (+ 1 clk))
-  (updateClk_dag dagState_TR)
-  (updateClk_dag dagState_SH)
-  (updateClk_dag dagState_RC)
-  (updateClk_SCH SCH)
+  (set-state-clk! state (+ 1 clk))
+  (updateClk_dag! dagState_TR)
+  (updateClk_dag! dagState_SH)
+  (updateClk_dag! dagState_RC)
+  (updateClk_scheduler! scheduler)
 
   ; recursive next cycle
   (println state)
-  (println observe)
-  (if (equal? MAXCLK clk) (void) (simu state observe MAXCLK)))
+  (println observation)
+  (if (equal? MAXCLK clk) (void) (simu state observation MAXCLK)))
 
 
 (define (testMe)
-  (define state (initState 3 3 3 6))
-  (define observe (initObserve))
-  (simu state observe 100))
+  (define state (init-state 3 3 3 6))
+  (define observation (init-observation))
+  (simu state observation 100))
 
 ;(testMe)
 
