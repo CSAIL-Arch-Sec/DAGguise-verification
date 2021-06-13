@@ -6,20 +6,27 @@
   addTR!
   extractTR!)
 
+
 (struct nodeMap (map) #:mutable #:transparent)
-(define (init-nodeMap) (nodeMap (make-hash)))
+(define (init-nodeMap) (nodeMap (list)))
 
 
 (define (addTR! nodeMap nodeID_SH nodeID_TR)
-  (assert (not (hash-has-key? (nodeMap-map nodeMap) nodeID_SH)))
-  (hash-set! (nodeMap-map nodeMap) nodeID_SH nodeID_TR))
+  (assert (not (findf
+    (lambda (pair) (equal? (car pair) nodeID_SH))
+    (nodeMap-map nodeMap))))
+  (set-nodeMap-map! nodeMap
+    (append (nodeMap-map nodeMap) (list (cons nodeID_SH nodeID_TR)))))
 
 (define (extractTR! nodeMap nodeID_SH)
-  (define nodeID_TR (hash-ref (nodeMap-map nodeMap) nodeID_SH (void)))
-  (if (equal? (void) nodeID_TR)
+  (define nodeIDPair (findf
+    (lambda (pair) (equal? (car pair) nodeID_SH))
+    (nodeMap-map nodeMap)))
+  (if (equal? #f nodeIDPair)
     (void)
-    (hash-remove! (nodeMap-map nodeMap) nodeID_SH))
-  nodeID_TR)
+    (begin
+      (set-nodeMap-map! nodeMap (remove nodeIDPair (nodeMap-map nodeMap)))
+      (cdr nodeIDPair))))
 
 
 (define (testMe)

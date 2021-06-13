@@ -2,13 +2,13 @@
 
 (provide
   (struct-out packet)
-  core_SH
-  core_RC)
+  CORE_SH
+  CORE_RC)
 
 
 (struct packet (coreID nodeID address tag) #:mutable #:transparent)
 
 
-(define core_SH 0)
-(define core_RC 1)
+(define CORE_SH 0)
+(define CORE_RC 1)
 

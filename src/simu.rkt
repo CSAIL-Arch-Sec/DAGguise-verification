@@ -47,11 +47,7 @@
       (not (equal? (void) (getHead obuf_SH)))
       (not (equal? (void) (getHead obuf_RC)))))
   (if accept_SH (updateWithReq! scheduler (pop! obuf_SH)) (void))
-  (println obuf_RC)
-  (println accept_RC)
-  (println scheduler)
   (if accept_RC (updateWithReq! scheduler (pop! obuf_RC)) (void))
-  (println scheduler)
 
   ; scheduler to SH/RC
   (match-define (list resp_SH resp_RC) (getResp scheduler))
@@ -77,7 +73,7 @@
   (updateClk_scheduler! scheduler)
 
   ; recursive next cycle
-  (println state)
+  ;(println state)
   (println observation)
   (if (equal? MAXCLK clk) (void) (simu state observation MAXCLK)))
 

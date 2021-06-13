@@ -38,8 +38,8 @@
 
 
 (define (testMe)
-  (checkInsecu 1 10))
-  ;(checkSecu 2 20))
+  ;(checkInsecu 1 10))
+  (checkSecu 3 20))
 
 (testMe)
 

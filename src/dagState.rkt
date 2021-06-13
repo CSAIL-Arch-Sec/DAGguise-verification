@@ -31,7 +31,7 @@
 
 
 (define (testMe)
-  (define dagState (init-dagState core_SH 3))
+  (define dagState (init-dagState CORE_SH 3))
   (updateWithResp! dagState 11111)
 
   (println (getReq dagState))

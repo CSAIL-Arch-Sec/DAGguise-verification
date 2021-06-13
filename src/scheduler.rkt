@@ -15,18 +15,24 @@
 
 
 (struct scheduler (servingPacket interval) #:mutable #:transparent)
-(define (init-scheduler interval) (scheduler (make-hash) interval))
+(define (init-scheduler interval) (scheduler (list) interval))
 
 
 (define (updateWithReq! scheduler packet)
-  (hash-set! (scheduler-servingPacket scheduler) packet (scheduler-interval scheduler)))
+  (assert (not (findf
+    (lambda (pair) (equal? (car pair) packet))
+    (scheduler-servingPacket scheduler))))
+  (set-scheduler-servingPacket! scheduler
+    (append (scheduler-servingPacket scheduler)
+      (list (cons packet (scheduler-interval scheduler))))))
 
 (define (updateClk_scheduler! scheduler)
-  (define (countDown key value)
-    (if (equal? 0 (hash-ref (scheduler-servingPacket scheduler) key))
-      (hash-remove! (scheduler-servingPacket scheduler) key)
-      (hash-set! (scheduler-servingPacket scheduler) key (- value 1))))
-  (hash-for-each (scheduler-servingPacket scheduler) countDown))
+  (define (notZero pair) (not (equal? 0 (cdr pair))))
+  (define (countDown pair)
+    (assert (not (equal? 0 (cdr pair))))
+    (cons (car pair) (- (cdr pair) 1)))
+  (set-scheduler-servingPacket! scheduler
+    (map countDown (filter notZero (scheduler-servingPacket scheduler)))))
 
 ;(match-define (list a b) (f))
 ;(do-something-with a b)
@@ -34,23 +40,20 @@
   (list req_SH req_RC))
 
 (define (getResp scheduler)
-  (define (getSH key value)
-    (if (and (equal? core_SH (packet-coreID key)) (equal? 0 value))
-      key
-      (void)))
-  (define respSH (filter (lambda (x) (not (void? x))) (hash-map (scheduler-servingPacket scheduler) getSH)))
-  (assert (> 2 (length respSH)))
+  (define (shouldResp coreID)
+    (lambda (pair)
+      (and (equal? coreID (packet-coreID (car pair)))
+               (equal? 0 (cdr pair)))))
 
-  (define (getRC key value)
-    (if (and (equal? core_RC (packet-coreID key)) (equal? 0 value))
-      key
-      (void)))
-  (define respRC (filter (lambda (x) (not (void? x))) (hash-map (scheduler-servingPacket scheduler) getRC)))
+  (define respSH (filter (shouldResp CORE_SH) (scheduler-servingPacket scheduler)))
+  (define respRC (filter (shouldResp CORE_RC) (scheduler-servingPacket scheduler)))
+  ; Currently, at most 1 request per cycle, then, at most 1 response per cycle
+  (assert (> 2 (length respSH)))
   (assert (> 2 (length respRC)))
 
-  (append 
-    (if (equal? 0 (length respSH)) (list (void)) respSH)
-    (if (equal? 0 (length respRC)) (list (void)) respRC)))
+  (list 
+    (if (equal? 0 (length respSH)) (void) (car (first respSH)))
+    (if (equal? 0 (length respRC)) (void) (car (first respRC)))))
 
 
 (define (testMe)
