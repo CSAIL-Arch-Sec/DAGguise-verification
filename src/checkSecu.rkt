@@ -39,9 +39,12 @@
   (verify (assert (equal? (getLog observe1) (getLog observe2)))))
 
 
+; NOTE: Becuase we cannot un-define a symbolic value,
+;       we cannot run these two check one by one in a single run,
+;       but have to run one each time.
 (define (testMe)
-  ;(checkInsecu 3 20))
-  (checkSecu 3 20))
+  ;(println (checkInsecu 3 20)))
+  (println (checkSecu 3 20)))
 
 (testMe)
 

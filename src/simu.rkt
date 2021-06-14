@@ -22,45 +22,41 @@
 
   ; in TR
   (let ([packet (getReq dagState_TR)])
-    (if (equal? (void) packet) (void) (push! obuf_TR packet)))
+    (unless (equal? (void) packet) (push! obuf_TR packet)))
 
   ; TR to SH
   (let [(packet_SH (getReq dagState_SH))]
-    (if (equal? (void) packet_SH)
-      (void)
+    (unless (equal? (void) packet_SH)
       (begin
-        (if (and (not (equal? (void) (getHead obuf_TR)))
-                 (equal? (packet-tag (getHead obuf_TR)) (packet-tag packet_SH)))
+        (when (and (not (equal? (void) (getHead obuf_TR)))
+                   (equal? (packet-tag (getHead obuf_TR)) (packet-tag packet_SH)))
           (let ([packet_TR (pop! obuf_TR)])
             (set-packet-address! packet_SH (packet-address packet_TR))
-            (addTR! nodeMap (packet-nodeID packet_TR) (packet-nodeID packet_SH)))
-          (void))
+            (addTR! nodeMap (packet-nodeID packet_TR) (packet-nodeID packet_SH))))
         (push! obuf_SH packet_SH))))
 
   ; in RC
   (let ([packet (getReq dagState_RC)])
-    (if (equal? (void) packet) (void) (push! obuf_RC packet)))
+    (unless (equal? (void) packet) (push! obuf_RC packet)))
 
   ; SH/RC to scheduler
   (match-define (list accept_SH accept_RC)
     (willAccept scheduler
       (not (equal? (void) (getHead obuf_SH)))
       (not (equal? (void) (getHead obuf_RC)))))
-  (if accept_SH (updateWithReq! scheduler (pop! obuf_SH)) (void))
-  (if accept_RC (updateWithReq! scheduler (pop! obuf_RC)) (void))
+  (when accept_SH (updateWithReq! scheduler (pop! obuf_SH)))
+  (when accept_RC (updateWithReq! scheduler (pop! obuf_RC)))
 
   ; scheduler to SH/RC
   (match-define (list resp_SH resp_RC) (getResp scheduler))
-  (if (equal? (void) resp_SH)
-    (void)
+  (unless (equal? (void) resp_SH)
     (begin
       (updateWithResp! dagState_SH (packet-nodeID resp_SH))
       (let ([nodeID_TR (extractTR! nodeMap (packet-nodeID resp_SH))])
         (if (equal? (void) nodeID_TR)
           (void)
           (updateWithResp! dagState_SH nodeID_TR)))))
-  (if (equal? (void) resp_RC)
-    (void)
+  (unless (equal? (void) resp_RC)
     (begin
       (updateWithResp! dagState_RC (packet-nodeID resp_RC))
       (addLog! observation clk)))
@@ -75,7 +71,7 @@
   ; recursive next cycle
   ;(println state)
   (println observation)
-  (if (equal? MAXCLK clk) (void) (simu state observation MAXCLK)))
+  (unless (equal? MAXCLK clk) (simu state observation MAXCLK)))
 
 
 (define (testMe)
