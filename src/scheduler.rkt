@@ -31,8 +31,17 @@
   (define (countDown pair)
     (assert (not (equal? 0 (cdr pair))))
     (cons (car pair) (- (cdr pair) 1)))
+
+  ; independent replay begin
+  ;(set-scheduler-servingPacket! scheduler
+  ;  (map countDown (filter notZero (scheduler-servingPacket scheduler)))))
+  ; independent replay end
+
+  ; dependent replay begin
+  (define rest (filter notZero (scheduler-servingPacket scheduler)))
   (set-scheduler-servingPacket! scheduler
-    (map countDown (filter notZero (scheduler-servingPacket scheduler)))))
+    (append (list (countDown (first rest))) (list-tail rest 1))))
+  ; dependent replay end
 
 ;(match-define (list a b) (f))
 ;(do-something-with a b)
@@ -79,6 +88,12 @@
   (println scheduler)
   (println "-------------------")
   (println (getResp scheduler))
+  (updateClk_scheduler! scheduler)
+  (println scheduler)
+  (println "-------------------")
+  (updateClk_scheduler! scheduler)
+  (println scheduler)
+  (println "-------------------")
   (updateClk_scheduler! scheduler)
   (println scheduler)
   (println "-------------------")

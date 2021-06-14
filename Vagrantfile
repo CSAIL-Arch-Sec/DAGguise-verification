@@ -16,7 +16,7 @@ Vagrant.configure("2") do |config|
   # config.vm.box_version = "1.1.0"
   config.vm.box = "ubuntu/focal64"
   config.vbguest.auto_update = false
-  config.ssh.forward_agent = true
+  #config.ssh.forward_agent = true. # forward agent has some problem on my Mac...
   config.ssh.forward_x11 = true
   
   config.proxy.http = "http://10.0.2.2:7890" # by default 10.0.2.2 is the host machine
