@@ -11,8 +11,13 @@
   
   (all-from-out "packet.rkt"))
 
-(struct dagState (cycleForNext coreID interval nodeID) #:mutable #:transparent)
-(define (init-dagState coreID interval) (dagState 0 coreID interval 0))
+
+;cycleForNext - will send a request after cycleForNext
+;nodeID - the ID of next sent request, unique for each req/resp pair
+;coreID - const - all sent packet will be labeled with coreID, unique for each core/dag
+;interval - const - send request every interval cycles
+(struct dagState (cycleForNext nodeID coreID interval) #:mutable #:transparent)
+(define (init-dagState coreID interval) (dagState 0 0 coreID interval))
 
 (define (updateWithResp! dagState nodeID)
   (void))

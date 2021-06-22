@@ -6,6 +6,10 @@
   CORE_RC)
 
 
+;coreID - who send this packet
+;nodeID - used to match req/resp
+;address - not used yet
+;tag - used for scheduler, for bank conflict, not used yet
 (struct packet (coreID nodeID address tag) #:mutable #:transparent)
 
 

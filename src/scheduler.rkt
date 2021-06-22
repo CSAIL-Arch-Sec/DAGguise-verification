@@ -17,6 +17,10 @@
 (define BUF_SIZE 10)
 
 
+;FIFO scheduler
+;buf - save packets that will be response in future
+;cycleFOrNext - will send a response after cycleForNext
+;interval - const - send response every interval cycles
 (struct scheduler (buf cycleForNext interval) #:mutable #:transparent)
 (define (init-scheduler interval) (scheduler (list) interval interval))
 
