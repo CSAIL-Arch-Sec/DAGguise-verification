@@ -14,63 +14,41 @@
   (all-from-out "packet.rkt"))
 
 
-(define BUFF_SIZE 10)
+(define BUF_SIZE 10)
 
 
-(struct scheduler (servingPacket interval) #:mutable #:transparent)
-(define (init-scheduler interval) (scheduler (list) interval))
+(struct scheduler (buf cycleForNext interval) #:mutable #:transparent)
+(define (init-scheduler interval) (scheduler (list) interval interval))
 
 
 (define (updateWithReq! scheduler packet)
-  (assert (not (findf
-    (lambda (pair) (equal? (car pair) packet))
-    (scheduler-servingPacket scheduler))))
-  (set-scheduler-servingPacket! scheduler
-    (append (scheduler-servingPacket scheduler)
-      (list (cons packet (scheduler-interval scheduler))))))
+  (assert (not (findf (lambda (x) (equal? x packet))
+    (scheduler-buf scheduler))))
+  (set-scheduler-buf! scheduler
+    (append (scheduler-buf scheduler) (list packet))))
 
 (define (updateClk_scheduler! scheduler)
-  (define (notZero pair) (not (equal? 0 (cdr pair))))
-  (define (countDown pair)
-    (assert (not (equal? 0 (cdr pair))))
-    (cons (car pair) (- (cdr pair) 1)))
-
-  ; independent replay begin
-  ;(set-scheduler-servingPacket! scheduler
-  ;  (map countDown (filter notZero (scheduler-servingPacket scheduler)))))
-  ; independent replay end
-
-  ; dependent replay begin
-  (define rest (filter notZero (scheduler-servingPacket scheduler)))
-  (if (< 0 (length rest))
-    (set-scheduler-servingPacket! scheduler
-      (append (list (countDown (first rest))) (list-tail rest 1)))
-    (set-scheduler-servingPacket! scheduler rest)))
-  ; dependent replay end
+  (unless (equal? 0 (length (scheduler-buf scheduler)))
+    (if (equal? 0 (scheduler-cycleForNext scheduler))
+      (begin (set-scheduler-buf! scheduler (rest (scheduler-buf scheduler)))
+             (set-scheduler-cycleForNext! scheduler (scheduler-interval scheduler)))
+      (set-scheduler-cycleForNext! scheduler (- (scheduler-cycleForNext scheduler) 1)))))
 
 ;(match-define (list a b) (f))
 ;(do-something-with a b)
 (define (willAccept scheduler req_SH req_RC)
-
-  (if (> BUFF_SIZE (length (scheduler-servingPacket scheduler)))
+  (if (> BUF_SIZE (length (scheduler-buf scheduler))) ;TODO: add prority
     (list req_SH req_RC)
     (list #f #f)))
 
 (define (getResp scheduler)
-  (define (shouldResp coreID)
-    (lambda (pair)
-      (and (equal? coreID (packet-coreID (car pair)))
-               (equal? 0 (cdr pair)))))
-
-  (define respSH (filter (shouldResp CORE_SH) (scheduler-servingPacket scheduler)))
-  (define respRC (filter (shouldResp CORE_RC) (scheduler-servingPacket scheduler)))
-  ; Currently, at most 1 request per cycle, then, at most 1 response per cycle
-  (assert (> 2 (length respSH)))
-  (assert (> 2 (length respRC)))
-
-  (list 
-    (if (equal? 0 (length respSH)) (void) (car (first respSH)))
-    (if (equal? 0 (length respRC)) (void) (car (first respRC)))))
+  (if (equal? 0 (scheduler-cycleForNext scheduler))
+    (let ([packet (first (scheduler-buf scheduler))])
+      (cond
+        [(equal? CORE_SH (packet-coreID packet)) (list packet (void))]
+        [(equal? CORE_RC (packet-coreID packet)) (list (void) packet)]
+        [else (assert #f)])) ;TODO: why need this assume?
+    (list (void) (void))))
 
 
 (define (testMe)
@@ -88,6 +66,11 @@
   (updateClk_scheduler! scheduler)
   (println scheduler)
   (println "-------------------")
+  (println (getResp scheduler))
+  (updateClk_scheduler! scheduler)
+  (println scheduler)
+  (println "-------------------")
+  (println (getResp scheduler))
   (updateClk_scheduler! scheduler)
   (println scheduler)
   (println "-------------------")
@@ -99,12 +82,27 @@
   (updateClk_scheduler! scheduler)
   (println scheduler)
   (println "-------------------")
+  (println (getResp scheduler))
   (updateClk_scheduler! scheduler)
   (println scheduler)
   (println "-------------------")
+  (println (getResp scheduler))
   (updateClk_scheduler! scheduler)
   (println scheduler)
   (println "-------------------")
+  (println (getResp scheduler))
+  (updateClk_scheduler! scheduler)
+  (println scheduler)
+  (println "-------------------")
+  (println (getResp scheduler))
+  (updateClk_scheduler! scheduler)
+  (println scheduler)
+  (println "-------------------")
+  (println (getResp scheduler))
+  (updateClk_scheduler! scheduler)
+  (println scheduler)
+  (println "-------------------")
+  (println (getResp scheduler))
   (updateClk_scheduler! scheduler)
   (println scheduler)
   (println "-------------------"))
