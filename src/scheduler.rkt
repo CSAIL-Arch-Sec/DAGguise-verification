@@ -26,8 +26,9 @@
 
 
 (define (updateWithReq! scheduler packet)
-  (assert (not (findf (lambda (x) (equal? x packet))
-    (scheduler-buf scheduler))))
+  ; This assert hurt performance too much
+  ;(assert (not (findf (lambda (x) (equal? x packet))
+  ;  (scheduler-buf scheduler))))
   (set-scheduler-buf! scheduler
     (append (scheduler-buf scheduler) (list packet))))
 
