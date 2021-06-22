@@ -10,12 +10,12 @@
   (define-symbolic pub (bitvector bitWidth))
 
   (define-symbolic sec1 (bitvector bitWidth))
-  (define state1 (init-state (bitvector->natural sec1) (bitvector->natural pub) 3 6))
+  (define state1 (init-state (bitvector->natural sec1) (bitvector->natural pub) 3 3))
   (define observe1 (init-observation))
   (simu state1 observe1 MAXCLK)
 
   (define-symbolic sec2 (bitvector bitWidth))
-  (define state2 (init-state (bitvector->natural sec2) (bitvector->natural pub) 3 6))
+  (define state2 (init-state (bitvector->natural sec2) (bitvector->natural pub) 3 3))
   (define observe2 (init-observation))
   (simu state2 observe2 MAXCLK)
 
@@ -44,7 +44,7 @@
 ;       but have to run one each time.
 (define (testMe)
   ;(println (checkInsecu 3 20)))
-  (println (checkSecu 3 20)))
+  (println (checkSecu 2 10)))
 
 (testMe)
 

@@ -14,6 +14,9 @@
   (all-from-out "packet.rkt"))
 
 
+(define BUFF_SIZE 10)
+
+
 (struct scheduler (servingPacket interval) #:mutable #:transparent)
 (define (init-scheduler interval) (scheduler (list) interval))
 
@@ -39,14 +42,19 @@
 
   ; dependent replay begin
   (define rest (filter notZero (scheduler-servingPacket scheduler)))
-  (set-scheduler-servingPacket! scheduler
-    (append (list (countDown (first rest))) (list-tail rest 1))))
+  (if (< 0 (length rest))
+    (set-scheduler-servingPacket! scheduler
+      (append (list (countDown (first rest))) (list-tail rest 1)))
+    (set-scheduler-servingPacket! scheduler rest)))
   ; dependent replay end
 
 ;(match-define (list a b) (f))
 ;(do-something-with a b)
 (define (willAccept scheduler req_SH req_RC)
-  (list req_SH req_RC))
+
+  (if (> BUFF_SIZE (length (scheduler-servingPacket scheduler)))
+    (list req_SH req_RC)
+    (list #f #f)))
 
 (define (getResp scheduler)
   (define (shouldResp coreID)
