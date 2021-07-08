@@ -5,7 +5,10 @@
   "observation.rkt")
 
 (provide
-  simu)
+  simu
+  
+  (all-from-out "state.rkt")
+  (all-from-out "observation.rkt"))
 
 
 (define (simu state observation MAXCLK)

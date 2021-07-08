@@ -1,13 +1,15 @@
 digraph G {
   "packet" -> "dagState";
-  "packet" -> "SCH";
+  "packet" -> "scheduler";
 
   "dagState" -> "state";
   "buffer" -> "state";
   "nodeMap" -> "state";
-  "SCH" -> "state";
+  "scheduler" -> "state";
 
   "state" -> "simu";
-  "observe" -> "simu";
+  "observation" -> "simu";
+
+  "simu" -> "checkSecu";
 }
 

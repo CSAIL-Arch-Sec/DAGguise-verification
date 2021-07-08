@@ -11,3 +11,6 @@ debug:
 perf:
 	raco symprofile src/checkSecu.rkt
 
+doc: doc/fileHierarchy.gv
+	dot -Tpdf doc/fileHierarchy.gv -o doc/fileHierarchy.pdf
+

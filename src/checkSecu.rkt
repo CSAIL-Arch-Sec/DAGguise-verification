@@ -1,9 +1,6 @@
 #lang rosette
 
-(require
-  "simu.rkt"
-  "state.rkt"
-  "observation.rkt")
+(require "simu.rkt")
 
 
 (define (checkSecu bitWidth MAXCLK)
