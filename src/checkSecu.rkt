@@ -11,47 +11,47 @@
 
   (define-symbolic sec1 (bitvector bitWidth))
   (define state1 (init-state (bitvector->natural sec1) (bitvector->natural pub) (bitvector->natural recv) 2))
-  (define observe1 (init-observation))
-  (simu state1 observe1 MAXCLK)
+  (define observation1 (init-observation))
+  (simu state1 observation1 MAXCLK)
 
   (define-symbolic sec2 (bitvector bitWidth))
   (define state2 (init-state (bitvector->natural sec2) (bitvector->natural pub) (bitvector->natural recv) 2))
-  (define observe2 (init-observation))
-  (simu state2 observe2 MAXCLK)
+  (define observation2 (init-observation))
+  (simu state2 observation2 MAXCLK)
 
-  (verify (assert (equal? (observation-log observe1) (observation-log observe2)))))
+  (verify (assert (equal? (observation-log observation1) (observation-log observation2)))))
 
 
 (define (checkRosette bitWidth MAXCLK)
   (define-symbolic scheduler1 (bitvector bitWidth))
   (define state1 (init-state 2 2 2 (bitvector->natural scheduler1)))
   ;(define state1 (init-state 2 2 2 1))
-  (define observe1 (init-observation))
-  (simu state1 observe1 MAXCLK)
+  (define observation1 (init-observation))
+  (simu state1 observation1 MAXCLK)
 
   (define-symbolic scheduler2 (bitvector bitWidth))
   (define state2 (init-state 2 2 2 (bitvector->natural scheduler2)))
   ;(define state2 (init-state 2 2 2 0))
-  (define observe2 (init-observation))
-  (simu state2 observe2 MAXCLK)
+  (define observation2 (init-observation))
+  (simu state2 observation2 MAXCLK)
 
-  (verify (assert (equal? (observation-log observe1) (observation-log observe2)))))
+  (verify (assert (equal? (observation-log observation1) (observation-log observation2)))))
 
 
 (define (checkInsecu bitWidth MAXCLK)
   (define-symbolic shaper1 (bitvector bitWidth))
   (define state1 (init-state 2 (bitvector->natural shaper1) 2 2))
   ;(define state1 (init-state 2 1 2 2))
-  (define observe1 (init-observation))
-  (simu state1 observe1 MAXCLK)
+  (define observation1 (init-observation))
+  (simu state1 observation1 MAXCLK)
 
   (define-symbolic shaper2 (bitvector bitWidth))
   (define state2 (init-state 2 (bitvector->natural shaper2) 2 2))
   ;(define state2 (init-state 2 0 2 2))
-  (define observe2 (init-observation))
-  (simu state2 observe2 MAXCLK)
+  (define observation2 (init-observation))
+  (simu state2 observation2 MAXCLK)
 
-  (verify (assert (equal? (observation-log observe1) (observation-log observe2)))))
+  (verify (assert (equal? (observation-log observation1) (observation-log observation2)))))
 
 
 ; NOTE: Becuase we cannot un-define a symbolic value,

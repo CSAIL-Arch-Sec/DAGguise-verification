@@ -12,23 +12,23 @@
 (define (init-observation) (observation (list)))
 
 
-(define (addLogTo-observation! observe clk)
-  (set-observation-log_Rx! observe (append (observation-log_Rx observe) (list clk))))
+(define (addLogTo-observation! observation clk)
+  (set-observation-log_Rx! observation (append (observation-log_Rx observation) (list clk))))
 
 
-(define (observation-log observe)
-  (observation-log_Rx observe))
+(define (observation-log observation)
+  (observation-log_Rx observation))
 
 
 (define (testMe)
-  (define observe (init-observation))
-  (addLogTo-observation! observe 1)
-  (addLogTo-observation! observe 3)
-  (addLogTo-observation! observe 10)
-  (println (observation-log observe))
+  (define observation (init-observation))
+  (addLogTo-observation! observation 1)
+  (addLogTo-observation! observation 3)
+  (addLogTo-observation! observation 10)
+  (println (observation-log observation))
 
-  (addLogTo-observation! observe 100)
-  (println (observation-log observe)))
+  (addLogTo-observation! observation 100)
+  (println (observation-log observation)))
 
 ;(testMe)
 
