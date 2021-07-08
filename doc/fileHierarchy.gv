@@ -3,7 +3,7 @@ digraph G {
   "packet" -> "SCH";
 
   "dagState" -> "state";
-  "obuf" -> "state";
+  "buffer" -> "state";
   "nodeMap" -> "state";
   "SCH" -> "state";
 

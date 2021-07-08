@@ -12,40 +12,40 @@
   ; nickname (NOTE: this will not be updated within this clk)
   (define clk (state-clk state))
   (define dagState_Tx (state-dagState_Tx state))
-  (define obuf_Tx (state-obuf_Tx state))
+  (define buffer_Tx (state-buffer_Tx state))
   (define dagState_Shaper (state-dagState_Shaper state))
-  (define obuf_Shaper (state-obuf_Shaper state))
+  (define buffer_Shaper (state-buffer_Shaper state))
   (define nodeMap (state-nodeMap state))
   (define dagState_Rx (state-dagState_Rx state))
-  (define obuf_Rx (state-obuf_Rx state))
+  (define buffer_Rx (state-buffer_Rx state))
   (define scheduler (state-scheduler state))
 
   ; in transmitter
   (let ([packet (dagState-req dagState_Tx)])
-    (unless (equal? (void) packet) (pushTo-obuf! obuf_Tx packet)))
+    (unless (equal? (void) packet) (pushTo-buffer! buffer_Tx packet)))
 
   ; transmitter to shaper
   (let [(packet_Shaper (dagState-req dagState_Shaper))]
     (unless (equal? (void) packet_Shaper)
       (begin
-        (when (and (not (equal? (void) (obuf-head obuf_Tx)))
-                   (equal? (packet-tag (obuf-head obuf_Tx)) (packet-tag packet_Shaper)))
-          (let ([packet_Tx (popFrom-obuf! obuf_Tx)])
+        (when (and (not (equal? (void) (buffer-head buffer_Tx)))
+                   (equal? (packet-tag (buffer-head buffer_Tx)) (packet-tag packet_Shaper)))
+          (let ([packet_Tx (popFrom-buffer! buffer_Tx)])
             (set-packet-address! packet_Shaper (packet-address packet_Tx))
             (addTxTo-nodeMap! nodeMap (packet-nodeID packet_Tx) (packet-nodeID packet_Shaper))))
-        (pushTo-obuf! obuf_Shaper packet_Shaper))))
+        (pushTo-buffer! buffer_Shaper packet_Shaper))))
 
   ; in receiver
   (let ([packet (dagState-req dagState_Rx)])
-    (unless (equal? (void) packet) (pushTo-obuf! obuf_Rx packet)))
+    (unless (equal? (void) packet) (pushTo-buffer! buffer_Rx packet)))
 
   ; shaper/receiver to scheduler
   (match-define (list accept_Shaper accept_Rx)
     (scheduler-canAccept scheduler
-      (not (equal? (void) (obuf-head obuf_Shaper)))
-      (not (equal? (void) (obuf-head obuf_Rx)))))
-  (when accept_Shaper (simuReqFor-scheduler! scheduler (popFrom-obuf! obuf_Shaper)))
-  (when accept_Rx (simuReqFor-scheduler! scheduler (popFrom-obuf! obuf_Rx)))
+      (not (equal? (void) (buffer-head buffer_Shaper)))
+      (not (equal? (void) (buffer-head buffer_Rx)))))
+  (when accept_Shaper (simuReqFor-scheduler! scheduler (popFrom-buffer! buffer_Shaper)))
+  (when accept_Rx (simuReqFor-scheduler! scheduler (popFrom-buffer! buffer_Rx)))
 
   ; scheduler to shaper/receiver
   (match-define (list resp_Shaper resp_Rx) (scheduler-resp scheduler))
