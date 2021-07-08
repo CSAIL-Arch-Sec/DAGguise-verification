@@ -13,13 +13,13 @@
 
 
 ;cycleForNext - will send a request after cycleForNext
-;nodeID - the ID of next sent request, unique for each req/resp pair
+;vertexID - the ID of next sent request, unique for each req/resp pair
 ;coreID - const - all sent packet will be labeled with coreID, unique for each core/dag
 ;interval - const - send request every interval cycles
-(struct dagState (cycleForNext nodeID coreID interval) #:mutable #:transparent)
+(struct dagState (cycleForNext vertexID coreID interval) #:mutable #:transparent)
 (define (init-dagState coreID interval) (dagState 0 0 coreID interval))
 
-(define (simuRespFor-dagState! dagState nodeID)
+(define (simuRespFor-dagState! dagState vertexID)
   (void))
 
 (define (incClkFor-dagState! dagState)
@@ -30,8 +30,8 @@
 (define (dagState-req dagState)
   (if (equal? 0 (dagState-cycleForNext dagState))
     (begin
-      (set-dagState-nodeID! dagState (+ 1 (dagState-nodeID dagState)))
-      (packet (dagState-coreID dagState) (dagState-nodeID dagState) 0 0))
+      (set-dagState-vertexID! dagState (+ 1 (dagState-vertexID dagState)))
+      (packet (dagState-coreID dagState) (dagState-vertexID dagState) 0 0))
     (void)))
 
 

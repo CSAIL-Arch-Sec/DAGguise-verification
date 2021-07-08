@@ -7,10 +7,10 @@
 
 
 ;coreID - who send this packet
-;nodeID - used to match req/resp
+;vertexID - used to match req/resp
 ;address - not used yet
 ;tag - used for scheduler, for bank conflict, not used yet
-(struct packet (coreID nodeID address tag) #:mutable #:transparent)
+(struct packet (coreID vertexID address tag) #:mutable #:transparent)
 
 
 (define CORE_Shaper 0)
