@@ -11,61 +11,61 @@
 (define (simu state observation MAXCLK)
   ; nickname (NOTE: this will not be updated within this clk)
   (define clk (state-clk state))
-  (define dagState_TR (state-dagState_TR state))
-  (define obuf_TR (state-obuf_TR state))
-  (define dagState_SH (state-dagState_SH state))
-  (define obuf_SH (state-obuf_SH state))
+  (define dagState_Tx (state-dagState_Tx state))
+  (define obuf_Tx (state-obuf_Tx state))
+  (define dagState_Shaper (state-dagState_Shaper state))
+  (define obuf_Shaper (state-obuf_Shaper state))
   (define nodeMap (state-nodeMap state))
-  (define dagState_RC (state-dagState_RC state))
-  (define obuf_RC (state-obuf_RC state))
+  (define dagState_Rx (state-dagState_Rx state))
+  (define obuf_Rx (state-obuf_Rx state))
   (define scheduler (state-scheduler state))
 
-  ; in TR
-  (let ([packet (dagState-req dagState_TR)])
-    (unless (equal? (void) packet) (pushTo-obuf! obuf_TR packet)))
+  ; in transmitter
+  (let ([packet (dagState-req dagState_Tx)])
+    (unless (equal? (void) packet) (pushTo-obuf! obuf_Tx packet)))
 
-  ; TR to SH
-  (let [(packet_SH (dagState-req dagState_SH))]
-    (unless (equal? (void) packet_SH)
+  ; transmitter to shaper
+  (let [(packet_Shaper (dagState-req dagState_Shaper))]
+    (unless (equal? (void) packet_Shaper)
       (begin
-        (when (and (not (equal? (void) (obuf-head obuf_TR)))
-                   (equal? (packet-tag (obuf-head obuf_TR)) (packet-tag packet_SH)))
-          (let ([packet_TR (popFrom-obuf! obuf_TR)])
-            (set-packet-address! packet_SH (packet-address packet_TR))
-            (addTRTo-nodeMap! nodeMap (packet-nodeID packet_TR) (packet-nodeID packet_SH))))
-        (pushTo-obuf! obuf_SH packet_SH))))
+        (when (and (not (equal? (void) (obuf-head obuf_Tx)))
+                   (equal? (packet-tag (obuf-head obuf_Tx)) (packet-tag packet_Shaper)))
+          (let ([packet_Tx (popFrom-obuf! obuf_Tx)])
+            (set-packet-address! packet_Shaper (packet-address packet_Tx))
+            (addTxTo-nodeMap! nodeMap (packet-nodeID packet_Tx) (packet-nodeID packet_Shaper))))
+        (pushTo-obuf! obuf_Shaper packet_Shaper))))
 
-  ; in RC
-  (let ([packet (dagState-req dagState_RC)])
-    (unless (equal? (void) packet) (pushTo-obuf! obuf_RC packet)))
+  ; in receiver
+  (let ([packet (dagState-req dagState_Rx)])
+    (unless (equal? (void) packet) (pushTo-obuf! obuf_Rx packet)))
 
-  ; SH/RC to scheduler
-  (match-define (list accept_SH accept_RC)
+  ; shaper/receiver to scheduler
+  (match-define (list accept_Shaper accept_Rx)
     (scheduler-canAccept scheduler
-      (not (equal? (void) (obuf-head obuf_SH)))
-      (not (equal? (void) (obuf-head obuf_RC)))))
-  (when accept_SH (simuReqFor-scheduler! scheduler (popFrom-obuf! obuf_SH)))
-  (when accept_RC (simuReqFor-scheduler! scheduler (popFrom-obuf! obuf_RC)))
+      (not (equal? (void) (obuf-head obuf_Shaper)))
+      (not (equal? (void) (obuf-head obuf_Rx)))))
+  (when accept_Shaper (simuReqFor-scheduler! scheduler (popFrom-obuf! obuf_Shaper)))
+  (when accept_Rx (simuReqFor-scheduler! scheduler (popFrom-obuf! obuf_Rx)))
 
-  ; scheduler to SH/RC
-  (match-define (list resp_SH resp_RC) (scheduler-resp scheduler))
-  (unless (equal? (void) resp_SH)
+  ; scheduler to shaper/receiver
+  (match-define (list resp_Shaper resp_Rx) (scheduler-resp scheduler))
+  (unless (equal? (void) resp_Shaper)
     (begin
-      (simuRespFor-dagState! dagState_SH (packet-nodeID resp_SH))
-      (let ([nodeID_TR (extractTRFrom-nodeMap! nodeMap (packet-nodeID resp_SH))])
-        (if (equal? (void) nodeID_TR)
+      (simuRespFor-dagState! dagState_Shaper (packet-nodeID resp_Shaper))
+      (let ([nodeID_Tx (extractTxFrom-nodeMap! nodeMap (packet-nodeID resp_Shaper))])
+        (if (equal? (void) nodeID_Tx)
           (void)
-          (simuRespFor-dagState! dagState_SH nodeID_TR)))))
-  (unless (equal? (void) resp_RC)
+          (simuRespFor-dagState! dagState_Shaper nodeID_Tx)))))
+  (unless (equal? (void) resp_Rx)
     (begin
-      (simuRespFor-dagState! dagState_RC (packet-nodeID resp_RC))
+      (simuRespFor-dagState! dagState_Rx (packet-nodeID resp_Rx))
       (addLogTo-observation! observation clk)))
 
   ; update clk
   (set-state-clk! state (+ 1 clk))
-  (incClkFor-dagState! dagState_TR)
-  (incClkFor-dagState! dagState_SH)
-  (incClkFor-dagState! dagState_RC)
+  (incClkFor-dagState! dagState_Tx)
+  (incClkFor-dagState! dagState_Shaper)
+  (incClkFor-dagState! dagState_Rx)
   (incClkFor-scheduler! scheduler)
 
   ; recursive next cycle

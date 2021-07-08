@@ -15,18 +15,20 @@
   (all-from-out "scheduler.rkt"))
 
 
+;Tx - transmitter
+;Rx - receiver
 (struct state 
   (
     clk
-    dagState_TR obuf_TR 
-    dagState_SH obuf_SH nodeMap
-    dagState_RC obuf_RC 
+    dagState_Tx obuf_Tx 
+    dagState_Shaper obuf_Shaper nodeMap
+    dagState_Rx obuf_Rx 
     scheduler)
   #:mutable #:transparent)
-(define (init-state interval_TR interval_SH interval_RC interval_SCH) (state
+(define (init-state interval_Tx interval_Shaper interval_Rx interval_SCH) (state
   0
-  (init-dagState CORE_SH interval_TR) (init-obuf)
-  (init-dagState CORE_SH interval_SH) (init-obuf) (init-nodeMap)
-  (init-dagState CORE_RC interval_RC) (init-obuf)
+  (init-dagState CORE_Shaper interval_Tx) (init-obuf)
+  (init-dagState CORE_Shaper interval_Shaper) (init-obuf) (init-nodeMap)
+  (init-dagState CORE_Rx interval_Rx) (init-obuf)
   (init-scheduler interval_SCH)))
 

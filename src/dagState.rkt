@@ -36,7 +36,7 @@
 
 
 (define (testMe)
-  (define dagState (init-dagState CORE_SH 3))
+  (define dagState (init-dagState CORE_Shaper 3))
   (simuRespFor-dagState! dagState 11111)
 
   (println (dagState-req dagState))

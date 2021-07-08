@@ -2,8 +2,8 @@
 
 (provide
   (struct-out packet)
-  CORE_SH
-  CORE_RC)
+  CORE_Shaper
+  CORE_Rx)
 
 
 ;coreID - who send this packet
@@ -13,6 +13,6 @@
 (struct packet (coreID nodeID address tag) #:mutable #:transparent)
 
 
-(define CORE_SH 0)
-(define CORE_RC 1)
+(define CORE_Shaper 0)
+(define CORE_Rx 1)
 

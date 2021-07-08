@@ -41,17 +41,17 @@
 
 ;(match-define (list a b) (f))
 ;(do-something-with a b)
-(define (scheduler-canAccept scheduler req_SH req_RC)
+(define (scheduler-canAccept scheduler req_Shaper req_Rx)
   (if (> BUF_SIZE (length (scheduler-buf scheduler))) ;TODO: add prority
-    (list req_SH req_RC)
+    (list req_Shaper req_Rx)
     (list #f #f)))
 
 (define (scheduler-resp scheduler)
   (if (equal? 0 (scheduler-cycleForNext scheduler))
     (let ([packet (first (scheduler-buf scheduler))])
       (cond
-        [(equal? CORE_SH (packet-coreID packet)) (list packet (void))]
-        [(equal? CORE_RC (packet-coreID packet)) (list (void) packet)]
+        [(equal? CORE_Shaper (packet-coreID packet)) (list packet (void))]
+        [(equal? CORE_Rx (packet-coreID packet)) (list (void) packet)]
         [else (assert #f)])) ;TODO: why need this assume?
     (list (void) (void))))
 

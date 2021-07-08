@@ -8,16 +8,16 @@
 
 
 ;TODO: log can be more complex than just clk
-(struct observation (log_RC) #:mutable #:transparent)
+(struct observation (log_Rx) #:mutable #:transparent)
 (define (init-observation) (observation (list)))
 
 
 (define (addLogTo-observation! observe clk)
-  (set-observation-log_RC! observe (append (observation-log_RC observe) (list clk))))
+  (set-observation-log_Rx! observe (append (observation-log_Rx observe) (list clk))))
 
 
 (define (observation-log observe)
-  (observation-log_RC observe))
+  (observation-log_Rx observe))
 
 
 (define (testMe)
