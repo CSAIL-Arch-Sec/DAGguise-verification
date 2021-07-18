@@ -4,14 +4,12 @@
 
 
 (define (checkSecu bitWidth MAXCLK)
-  (define-symbolic pub recv (bitvector bitWidth))
+  (define-symbolic sec1 sec2 pub recv (bitvector bitWidth))
 
-  (define-symbolic sec1 (bitvector bitWidth))
   (define state1 (init-state (bitvector->natural sec1) (bitvector->natural pub) (bitvector->natural recv) 2))
   (define observation1 (init-observation))
   (simu state1 observation1 MAXCLK)
 
-  (define-symbolic sec2 (bitvector bitWidth))
   (define state2 (init-state (bitvector->natural sec2) (bitvector->natural pub) (bitvector->natural recv) 2))
   (define observation2 (init-observation))
   (simu state2 observation2 MAXCLK)

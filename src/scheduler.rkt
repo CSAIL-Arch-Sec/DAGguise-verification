@@ -19,16 +19,13 @@
 
 ;FIFO scheduler
 ;buf - save packets that will be response in future
-;cycleFOrNext - will send a response after cycleForNext
+;cycleForNext - will send a response after cycleForNext
 ;interval - const - send response every interval cycles
 (struct scheduler (buf cycleForNext interval) #:mutable #:transparent)
 (define (init-scheduler interval) (scheduler (list) interval interval))
 
 
 (define (simuReqFor-scheduler! scheduler packet)
-  ; This assert hurt performance too much
-  ;(assert (not (findf (lambda (x) (equal? x packet))
-  ;  (scheduler-buf scheduler))))
   (set-scheduler-buf! scheduler
     (append (scheduler-buf scheduler) (list packet))))
 

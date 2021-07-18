@@ -12,9 +12,6 @@
 
 
 (define (addTxTo-vertexMap! vertexMap vertexID_Shaper vertexID_Tx)
-  ;(assert (not (findf
-  ;  (lambda (pair) (equal? (car pair) vertexID_Shaper))
-  ;  (vertexMap-map vertexMap))))
   (set-vertexMap-map! vertexMap
     (append (vertexMap-map vertexMap) (list (cons vertexID_Shaper vertexID_Tx)))))
 

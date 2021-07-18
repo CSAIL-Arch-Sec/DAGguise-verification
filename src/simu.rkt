@@ -25,11 +25,11 @@
 
   ; in transmitter
   (let ([packet (dagState-req dagState_Tx)])
-    (unless (equal? (void) packet) (pushTo-buffer! buffer_Tx packet)))
+    (unless (void? packet) (pushTo-buffer! buffer_Tx packet)))
 
   ; transmitter to shaper
   (let [(packet_Shaper (dagState-req dagState_Shaper))]
-    (unless (equal? (void) packet_Shaper)
+    (unless (void? packet_Shaper)
       (begin
         (when (and (not (equal? (void) (buffer-head buffer_Tx)))
                    (equal? (packet-tag (buffer-head buffer_Tx)) (packet-tag packet_Shaper)))
@@ -40,7 +40,7 @@
 
   ; in receiver
   (let ([packet (dagState-req dagState_Rx)])
-    (unless (equal? (void) packet) (pushTo-buffer! buffer_Rx packet)))
+    (unless (void? packet) (pushTo-buffer! buffer_Rx packet)))
 
   ; shaper/receiver to scheduler
   (match-define (list accept_Shaper accept_Rx)
@@ -82,5 +82,5 @@
   (define observation (init-observation))
   (simu state observation 100))
 
-(testMe)
+;(testMe)
 
