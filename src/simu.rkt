@@ -10,6 +10,8 @@
   (all-from-out "state.rkt")
   (all-from-out "observation.rkt"))
 
+(error-print-width 1000000)
+
 
 (define (simu state observation MAXCLK)
   ; nickname (NOTE: this will not be updated within this clk)
@@ -72,8 +74,11 @@
   (incClkFor-scheduler! scheduler)
 
   ; recursive next cycle
-  ;(println state)
-  (println observation)
+  (println "state")
+  (println state)
+  ;(println "scheduler")
+  ;(println scheduler)
+  ;(println observation)
   (unless (equal? MAXCLK clk) (simu state observation MAXCLK)))
 
 

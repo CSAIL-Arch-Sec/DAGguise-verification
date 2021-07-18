@@ -22,8 +22,11 @@
 
 
 (define (packet-simple complexPacket)
-  (packet
-    (packet-coreID complexPacket)
-    (expr-simple (packet-vertexID complexPacket))
-    (packet-address complexPacket)
-    (packet-tag complexPacket)))
+  (if (void? complexPacket)
+    complexPacket
+    (packet
+      (packet-coreID complexPacket)
+      (expr-simple (packet-vertexID complexPacket) DEBUG_SYMOPT)
+      (packet-address complexPacket)
+      (packet-tag complexPacket))
+    ))
