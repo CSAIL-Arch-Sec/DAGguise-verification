@@ -5,9 +5,9 @@
 (provide
   init-dagState
 
-  updateWithResp!
-  updateClk_dag!
-  getReq
+  simuRespFor-dagState!
+  incClkFor-dagState!
+  dagState-req
   
   (all-from-out "packet.rkt"))
 
@@ -19,15 +19,15 @@
 (struct dagState (cycleForNext nodeID coreID interval) #:mutable #:transparent)
 (define (init-dagState coreID interval) (dagState 0 0 coreID interval))
 
-(define (updateWithResp! dagState nodeID)
+(define (simuRespFor-dagState! dagState nodeID)
   (void))
 
-(define (updateClk_dag! dagState)
+(define (incClkFor-dagState! dagState)
   (if (equal? 0 (dagState-cycleForNext dagState))
     (set-dagState-cycleForNext! dagState (dagState-interval dagState))
     (set-dagState-cycleForNext! dagState (- (dagState-cycleForNext dagState) 1))))
 
-(define (getReq dagState)
+(define (dagState-req dagState)
   (if (equal? 0 (dagState-cycleForNext dagState))
     (begin
       (set-dagState-nodeID! dagState (+ 1 (dagState-nodeID dagState)))
@@ -37,17 +37,17 @@
 
 (define (testMe)
   (define dagState (init-dagState CORE_SH 3))
-  (updateWithResp! dagState 11111)
+  (simuRespFor-dagState! dagState 11111)
 
-  (println (getReq dagState))
-  (updateClk_dag! dagState)
-  (println (getReq dagState))
-  (updateClk_dag! dagState)
-  (println (getReq dagState))
-  (updateClk_dag! dagState)
-  (println (getReq dagState))
-  (updateClk_dag! dagState)
-  (println (getReq dagState))
-  (updateClk_dag! dagState))
+  (println (dagState-req dagState))
+  (incClkFor-dagState! dagState)
+  (println (dagState-req dagState))
+  (incClkFor-dagState! dagState)
+  (println (dagState-req dagState))
+  (incClkFor-dagState! dagState)
+  (println (dagState-req dagState))
+  (incClkFor-dagState! dagState)
+  (println (dagState-req dagState))
+  (incClkFor-dagState! dagState))
 
 ;(testMe)

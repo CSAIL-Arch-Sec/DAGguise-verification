@@ -3,22 +3,22 @@
 (provide 
   init-nodeMap
 
-  addTR!
-  extractTR!)
+  addTRTo-nodeMap!
+  extractTRFrom-nodeMap!)
 
 
 (struct nodeMap (map) #:mutable #:transparent)
 (define (init-nodeMap) (nodeMap (list)))
 
 
-(define (addTR! nodeMap nodeID_SH nodeID_TR)
-  (assert (not (findf
-    (lambda (pair) (equal? (car pair) nodeID_SH))
-    (nodeMap-map nodeMap))))
+(define (addTRTo-nodeMap! nodeMap nodeID_SH nodeID_TR)
+  ;(assert (not (findf
+  ;  (lambda (pair) (equal? (car pair) nodeID_SH))
+  ;  (nodeMap-map nodeMap))))
   (set-nodeMap-map! nodeMap
     (append (nodeMap-map nodeMap) (list (cons nodeID_SH nodeID_TR)))))
 
-(define (extractTR! nodeMap nodeID_SH)
+(define (extractTRFrom-nodeMap! nodeMap nodeID_SH)
   (define nodeIDPair (findf
     (lambda (pair) (equal? (car pair) nodeID_SH))
     (nodeMap-map nodeMap)))
@@ -31,12 +31,12 @@
 
 (define (testMe)
   (define nodeMap (init-nodeMap))
-  (addTR! nodeMap 1 10)
+  (addTRTo-nodeMap! nodeMap 1 10)
   (println nodeMap)
-  (addTR! nodeMap 2 20)
+  (addTRTo-nodeMap! nodeMap 2 20)
   (println nodeMap)
-  (println (extractTR! nodeMap 1))
-  (println (extractTR! nodeMap 3))
+  (println (extractTRFrom-nodeMap! nodeMap 1))
+  (println (extractTRFrom-nodeMap! nodeMap 3))
   (println nodeMap))
 
 ;(testMe)

@@ -6,10 +6,10 @@
 (provide
   init-scheduler
 
-  updateWithReq!
-  updateClk_scheduler!
-  willAccept
-  getResp
+  simuReqFor-scheduler!
+  incClkFor-scheduler!
+  scheduler-canAccept
+  scheduler-resp
   
   (all-from-out "packet.rkt"))
 
@@ -25,14 +25,14 @@
 (define (init-scheduler interval) (scheduler (list) interval interval))
 
 
-(define (updateWithReq! scheduler packet)
+(define (simuReqFor-scheduler! scheduler packet)
   ; This assert hurt performance too much
   ;(assert (not (findf (lambda (x) (equal? x packet))
   ;  (scheduler-buf scheduler))))
   (set-scheduler-buf! scheduler
     (append (scheduler-buf scheduler) (list packet))))
 
-(define (updateClk_scheduler! scheduler)
+(define (incClkFor-scheduler! scheduler)
   (unless (equal? 0 (length (scheduler-buf scheduler)))
     (if (equal? 0 (scheduler-cycleForNext scheduler))
       (begin (set-scheduler-buf! scheduler (rest (scheduler-buf scheduler)))
@@ -41,12 +41,12 @@
 
 ;(match-define (list a b) (f))
 ;(do-something-with a b)
-(define (willAccept scheduler req_SH req_RC)
+(define (scheduler-canAccept scheduler req_SH req_RC)
   (if (> BUF_SIZE (length (scheduler-buf scheduler))) ;TODO: add prority
     (list req_SH req_RC)
     (list #f #f)))
 
-(define (getResp scheduler)
+(define (scheduler-resp scheduler)
   (if (equal? 0 (scheduler-cycleForNext scheduler))
     (let ([packet (first (scheduler-buf scheduler))])
       (cond
@@ -59,56 +59,56 @@
 (define (testMe)
   (define scheduler (init-scheduler 3))
 
-  (println (willAccept scheduler #t #f))
+  (println (scheduler-canAccept scheduler #t #f))
   (println "-------------------")
   
-  (updateWithReq! scheduler (packet 0 0 0 0))
-  (updateClk_scheduler! scheduler)
+  (simuReqFor-scheduler! scheduler (packet 0 0 0 0))
+  (incClkFor-scheduler! scheduler)
   (println scheduler)
   (println "-------------------")
-  (updateWithReq! scheduler (packet 0 0 0 1))
-  (updateWithReq! scheduler (packet 1 0 0 1))
-  (updateClk_scheduler! scheduler)
+  (simuReqFor-scheduler! scheduler (packet 0 0 0 1))
+  (simuReqFor-scheduler! scheduler (packet 1 0 0 1))
+  (incClkFor-scheduler! scheduler)
   (println scheduler)
   (println "-------------------")
-  (println (getResp scheduler))
-  (updateClk_scheduler! scheduler)
+  (println (scheduler-resp scheduler))
+  (incClkFor-scheduler! scheduler)
   (println scheduler)
   (println "-------------------")
-  (println (getResp scheduler))
-  (updateClk_scheduler! scheduler)
+  (println (scheduler-resp scheduler))
+  (incClkFor-scheduler! scheduler)
   (println scheduler)
   (println "-------------------")
-  (println (getResp scheduler))
-  (updateClk_scheduler! scheduler)
+  (println (scheduler-resp scheduler))
+  (incClkFor-scheduler! scheduler)
   (println scheduler)
   (println "-------------------")
-  (println (getResp scheduler))
-  (updateClk_scheduler! scheduler)
+  (println (scheduler-resp scheduler))
+  (incClkFor-scheduler! scheduler)
   (println scheduler)
   (println "-------------------")
-  (println (getResp scheduler))
-  (updateClk_scheduler! scheduler)
+  (println (scheduler-resp scheduler))
+  (incClkFor-scheduler! scheduler)
   (println scheduler)
   (println "-------------------")
-  (println (getResp scheduler))
-  (updateClk_scheduler! scheduler)
+  (println (scheduler-resp scheduler))
+  (incClkFor-scheduler! scheduler)
   (println scheduler)
   (println "-------------------")
-  (println (getResp scheduler))
-  (updateClk_scheduler! scheduler)
+  (println (scheduler-resp scheduler))
+  (incClkFor-scheduler! scheduler)
   (println scheduler)
   (println "-------------------")
-  (println (getResp scheduler))
-  (updateClk_scheduler! scheduler)
+  (println (scheduler-resp scheduler))
+  (incClkFor-scheduler! scheduler)
   (println scheduler)
   (println "-------------------")
-  (println (getResp scheduler))
-  (updateClk_scheduler! scheduler)
+  (println (scheduler-resp scheduler))
+  (incClkFor-scheduler! scheduler)
   (println scheduler)
   (println "-------------------")
-  (println (getResp scheduler))
-  (updateClk_scheduler! scheduler)
+  (println (scheduler-resp scheduler))
+  (incClkFor-scheduler! scheduler)
   (println scheduler)
   (println "-------------------"))
 

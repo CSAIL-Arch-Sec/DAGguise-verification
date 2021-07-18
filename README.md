@@ -7,3 +7,7 @@
 - Possible bug: why can observe (4 5 6 7 8 9 10)?
 - if you write some dynamic invalid code, rosette will just put them into assume. This will cause these cases not been checked.
 
+## Name Conventions
+
+- change state: transitiveVerb-object! (e.g. set-cpu-reg!); object-intransitiveVerb!
+- just a logic from state: object-info

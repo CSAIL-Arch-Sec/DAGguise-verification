@@ -19,7 +19,7 @@
   (define observe2 (init-observation))
   (simu state2 observe2 MAXCLK)
 
-  (verify (assert (equal? (getLog observe1) (getLog observe2)))))
+  (verify (assert (equal? (observation-log observe1) (observation-log observe2)))))
 
 
 (define (checkRosette bitWidth MAXCLK)
@@ -35,7 +35,7 @@
   (define observe2 (init-observation))
   (simu state2 observe2 MAXCLK)
 
-  (verify (assert (equal? (getLog observe1) (getLog observe2)))))
+  (verify (assert (equal? (observation-log observe1) (observation-log observe2)))))
 
 
 (define (checkInsecu bitWidth MAXCLK)
@@ -51,14 +51,14 @@
   (define observe2 (init-observation))
   (simu state2 observe2 MAXCLK)
 
-  (verify (assert (equal? (getLog observe1) (getLog observe2)))))
+  (verify (assert (equal? (observation-log observe1) (observation-log observe2)))))
 
 
 ; NOTE: Becuase we cannot un-define a symbolic value,
 ;       we cannot run these two check one by one in a single run,
 ;       but have to run one each time.
 (define (testMe)
-  (println (checkSecu 2 10)))
+  (println (checkSecu 2 12)))
   ;(println (checkRosette 2 10)))
   ;(println (checkInsecu 2 10)))
 

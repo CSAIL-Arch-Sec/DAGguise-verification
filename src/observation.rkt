@@ -3,8 +3,8 @@
 (provide
   init-observation
 
-  addLog!
-  getLog)
+  addLogTo-observation!
+  observation-log)
 
 
 ;TODO: log can be more complex than just clk
@@ -12,23 +12,23 @@
 (define (init-observation) (observation (list)))
 
 
-(define (addLog! observe clk)
+(define (addLogTo-observation! observe clk)
   (set-observation-log_RC! observe (append (observation-log_RC observe) (list clk))))
 
 
-(define (getLog observe)
+(define (observation-log observe)
   (observation-log_RC observe))
 
 
 (define (testMe)
   (define observe (init-observation))
-  (addLog! observe 1)
-  (addLog! observe 3)
-  (addLog! observe 10)
-  (println (getLog observe))
+  (addLogTo-observation! observe 1)
+  (addLogTo-observation! observe 3)
+  (addLogTo-observation! observe 10)
+  (println (observation-log observe))
 
-  (addLog! observe 100)
-  (println (getLog observe)))
+  (addLogTo-observation! observe 100)
+  (println (observation-log observe)))
 
 ;(testMe)
 
