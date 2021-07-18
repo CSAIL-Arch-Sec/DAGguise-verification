@@ -1,4 +1,13 @@
 digraph G {
+
+  "symopt" [style="dotted"];
+  "symopt" -> "packet" [style="dotted"];
+  "symopt" -> "buffer" [style="dotted"];
+  "symopt" -> "dagState" [style="dotted"];
+  "symopt" -> "scheduler" [style="dotted"];
+
+
+  "packet" -> "buffer";
   "packet" -> "dagState";
   "packet" -> "scheduler";
 

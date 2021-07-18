@@ -1,19 +1,47 @@
 #lang rosette
 
+(require "packet.rkt" "symopt.rkt")
+(require rosette/base/core/union)
+
 (provide
   init-buffer
 
   pushTo-buffer!
   popFrom-buffer!
-  buffer-head)
+  buffer-head
+
+  (all-from-out "packet.rkt"))
+
+(define DEBUG_SYMOPT #f)
 
 
 (struct buffer (buf) #:mutable #:transparent)
 (define (init-buffer) (buffer (list)))
 
 
+(define (symopt-buffer! buffer)
+  (define (symopt-union! union)
+    (when (union? union)
+      (define (guardKey-simple guardKey)
+        (cons
+          (expr-simple (car guardKey) DEBUG_SYMOPT)
+          (packet-simple (cdr guardKey))))
+      (define union-contents-old (union-contents union))
+      (define union-contents-new (map guardKey-simple union-contents-old))
+      (set-union-contents! union union-contents-new)))
+  (for-each symopt-union! (buffer-buf buffer)))
+
+
 (define (pushTo-buffer! buffer packet)
-  (set-buffer-buf! buffer (append (buffer-buf buffer) (list packet))))
+  (set-buffer-buf! buffer (append (buffer-buf buffer) (list packet)))
+  (when DEBUG_SYMOPT (println "--------------------------------------------------"))
+  (when DEBUG_SYMOPT (println "before symopt: pushTo-buffer!"))
+  (when DEBUG_SYMOPT (println buffer))
+  (symopt-buffer! buffer)
+  (when DEBUG_SYMOPT (println "after symopt: pushTo-buffer!"))
+  (when DEBUG_SYMOPT (println buffer))
+  (when DEBUG_SYMOPT (println "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"))
+  )
 
 (define (popFrom-buffer! buffer)
   (assert (> (length (buffer-buf buffer)) 0))

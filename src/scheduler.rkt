@@ -1,7 +1,8 @@
 #lang rosette
 ; rosette? rosette/safe?
 
-(require "packet.rkt")
+(require "packet.rkt" "symopt.rkt")
+(require rosette/base/core/union)
 
 (provide
   init-scheduler
@@ -13,8 +14,8 @@
   
   (all-from-out "packet.rkt"))
 
-
 (define BUF_SIZE 10)
+(define DEBUG_SYMOPT #f)
 
 
 ;FIFO scheduler
@@ -25,9 +26,29 @@
 (define (init-scheduler interval) (scheduler (list) interval (- interval 1))) ;TODO: this is a hack to get good response interval
 
 
+(define (symopt-scheduler! scheduler)
+  (when (union? (scheduler-buf scheduler))
+    (define (update-guardKey guardKey)
+      (append
+        (list (expr-simple (car guardKey) DEBUG_SYMOPT))
+        (map packet-simple (rest guardKey))))
+    (define union-contents-old (union-contents (scheduler-buf scheduler)))
+    (define union-contents-new (map update-guardKey union-contents-old))
+    
+    (set-union-contents! (scheduler-buf scheduler) union-contents-new)))
+
+
 (define (simuReqFor-scheduler! scheduler packet)
   (set-scheduler-buf! scheduler
-    (append (scheduler-buf scheduler) (list packet))))
+    (append (scheduler-buf scheduler) (list packet)))
+  (when DEBUG_SYMOPT (println "--------------------------------------------------"))
+  (when DEBUG_SYMOPT (println "before symopt: simuReqFor-scheduler!"))
+  (when DEBUG_SYMOPT (println scheduler))
+  (symopt-scheduler! scheduler)
+  (when DEBUG_SYMOPT (println "after symopt: simuReqFor-scheduler!"))
+  (when DEBUG_SYMOPT (println scheduler))
+  (when DEBUG_SYMOPT (println "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"))
+  )
 
 (define (incClkFor-scheduler! scheduler)
   ;(unless (equal? 0 (length (scheduler-buf scheduler)))
@@ -35,6 +56,13 @@
       (begin (set-scheduler-buf! scheduler (rest (scheduler-buf scheduler)))
              (set-scheduler-cycleForNext! scheduler (scheduler-interval scheduler)))
       (set-scheduler-cycleForNext! scheduler (- (scheduler-cycleForNext scheduler) 1)));)
+  (when DEBUG_SYMOPT (println "--------------------------------------------------"))
+  (when DEBUG_SYMOPT (println "before symopt: incClkFor-scheduler!"))
+  (when DEBUG_SYMOPT (println scheduler))
+  (symopt-scheduler! scheduler)
+  (when DEBUG_SYMOPT (println "after symopt: incClkFor-scheduler!"))
+  (when DEBUG_SYMOPT (println scheduler))
+  (when DEBUG_SYMOPT (println "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"))
   )
 
 ;(match-define (list a b) (f))
