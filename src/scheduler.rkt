@@ -22,7 +22,7 @@
 ;cycleForNext - will send a response after cycleForNext
 ;interval - const - send response every interval cycles
 (struct scheduler (buf cycleForNext interval) #:mutable #:transparent)
-(define (init-scheduler interval) (scheduler (list) interval interval))
+(define (init-scheduler interval) (scheduler (list) interval (- interval 1))) ;TODO: this is a hack to get good response interval
 
 
 (define (simuReqFor-scheduler! scheduler packet)
@@ -30,18 +30,21 @@
     (append (scheduler-buf scheduler) (list packet))))
 
 (define (incClkFor-scheduler! scheduler)
-  (unless (equal? 0 (length (scheduler-buf scheduler)))
+  ;(unless (equal? 0 (length (scheduler-buf scheduler)))
     (if (equal? 0 (scheduler-cycleForNext scheduler))
       (begin (set-scheduler-buf! scheduler (rest (scheduler-buf scheduler)))
              (set-scheduler-cycleForNext! scheduler (scheduler-interval scheduler)))
-      (set-scheduler-cycleForNext! scheduler (- (scheduler-cycleForNext scheduler) 1)))))
+      (set-scheduler-cycleForNext! scheduler (- (scheduler-cycleForNext scheduler) 1)));)
+  )
 
 ;(match-define (list a b) (f))
 ;(do-something-with a b)
 (define (scheduler-canAccept scheduler req_Shaper req_Rx)
-  (if (> BUF_SIZE (length (scheduler-buf scheduler))) ;TODO: add prority
-    (list req_Shaper req_Rx)
-    (list #f #f)))
+  (list req_Shaper req_Rx)
+  ;(if (> BUF_SIZE (length (scheduler-buf scheduler))) ;TODO: add prority
+  ;  (list req_Shaper req_Rx)
+  ;  (list #f #f))
+  )
 
 (define (scheduler-resp scheduler)
   (if (equal? 0 (scheduler-cycleForNext scheduler))

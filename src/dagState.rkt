@@ -17,7 +17,7 @@
 ;coreID - const - all sent packet will be labeled with coreID, unique for each core/dag
 ;interval - const - send request every interval cycles
 (struct dagState (cycleForNext vertexID coreID interval) #:mutable #:transparent)
-(define (init-dagState coreID interval) (dagState 0 0 coreID interval))
+(define (init-dagState coreID interval) (dagState interval 0 coreID interval))
 
 (define (simuRespFor-dagState! dagState vertexID)
   (void))
