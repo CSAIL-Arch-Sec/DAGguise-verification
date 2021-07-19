@@ -73,6 +73,15 @@
   (incClkFor-dagState! dagState_Rx)
   (incClkFor-scheduler! scheduler)
 
+  ; symbolic optimization
+  (symopt-dagState! dagState_Tx)
+  (symopt-dagState! dagState_Shaper)
+  (symopt-dagState! dagState_Rx)
+  (symopt-buffer! buffer_Tx)
+  (symopt-buffer! buffer_Shaper)
+  (symopt-buffer! buffer_Rx)
+  (symopt-scheduler! scheduler)
+
   ; recursive next cycle
   (println "state")
   (println state)

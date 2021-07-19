@@ -5,6 +5,7 @@
 (provide
   init-dagState
 
+  symopt-dagState!
   simuRespFor-dagState!
   incClkFor-dagState!
   dagState-req
@@ -23,8 +24,18 @@
 
 
 (define (symopt-dagState! dagState)
+
+  (when DEBUG_SYMOPT (println "--------------------------------------------------"))
+  (when DEBUG_SYMOPT (println "before symopt: symopt-dagState!"))
+  (when DEBUG_SYMOPT (println dagState))
+
   (set-dagState-cycleForNext! dagState (expr-simple (dagState-cycleForNext dagState) DEBUG_SYMOPT))
-  (set-dagState-vertexID! dagState (expr-simple (dagState-vertexID dagState) DEBUG_SYMOPT)))
+  (set-dagState-vertexID! dagState (expr-simple (dagState-vertexID dagState) DEBUG_SYMOPT))
+
+  (when DEBUG_SYMOPT (println "after symopt: symopt-dagState!"))
+  (when DEBUG_SYMOPT (println dagState))
+  (when DEBUG_SYMOPT (println "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"))
+)
 
 
 (define (simuRespFor-dagState! dagState vertexID)
@@ -33,15 +44,7 @@
 (define (incClkFor-dagState! dagState)
   (if (equal? 0 (dagState-cycleForNext dagState))
     (set-dagState-cycleForNext! dagState (dagState-interval dagState))
-    (set-dagState-cycleForNext! dagState (- (dagState-cycleForNext dagState) 1)))
-  (when DEBUG_SYMOPT (println "--------------------------------------------------"))
-  (when DEBUG_SYMOPT (println "before symopt: incClkFor-dagState!"))
-  (when DEBUG_SYMOPT (println dagState))
-  (symopt-dagState! dagState)
-  (when DEBUG_SYMOPT (println "after symopt: incClkFor-dagState!"))
-  (when DEBUG_SYMOPT (println dagState))
-  (when DEBUG_SYMOPT (println "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"))
-  )
+    (set-dagState-cycleForNext! dagState (- (dagState-cycleForNext dagState) 1))))
 
 (define (dagState-req dagState)
   (if (equal? 0 (dagState-cycleForNext dagState))

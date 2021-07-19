@@ -6,6 +6,7 @@
 (provide
   init-buffer
 
+  symopt-buffer!
   pushTo-buffer!
   popFrom-buffer!
   buffer-head
@@ -20,6 +21,11 @@
 
 
 (define (symopt-buffer! buffer)
+
+  (when DEBUG_SYMOPT (println "--------------------------------------------------"))
+  (when DEBUG_SYMOPT (println "before symopt: symopt-buffer!"))
+  (when DEBUG_SYMOPT (println buffer))
+
   (define (symopt-union! union)
     (when (union? union)
       (define (guardKey-simple guardKey)
@@ -29,19 +35,16 @@
       (define union-contents-old (union-contents union))
       (define union-contents-new (map guardKey-simple union-contents-old))
       (set-union-contents! union union-contents-new)))
-  (for-each symopt-union! (buffer-buf buffer)))
+  (for-each symopt-union! (buffer-buf buffer))
+
+  (when DEBUG_SYMOPT (println "after symopt: symopt-buffer!"))
+  (when DEBUG_SYMOPT (println buffer))
+  (when DEBUG_SYMOPT (println "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"))
+)
 
 
 (define (pushTo-buffer! buffer packet)
-  (set-buffer-buf! buffer (append (buffer-buf buffer) (list packet)))
-  (when DEBUG_SYMOPT (println "--------------------------------------------------"))
-  (when DEBUG_SYMOPT (println "before symopt: pushTo-buffer!"))
-  (when DEBUG_SYMOPT (println buffer))
-  (symopt-buffer! buffer)
-  (when DEBUG_SYMOPT (println "after symopt: pushTo-buffer!"))
-  (when DEBUG_SYMOPT (println buffer))
-  (when DEBUG_SYMOPT (println "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"))
-  )
+  (set-buffer-buf! buffer (append (buffer-buf buffer) (list packet))))
 
 (define (popFrom-buffer! buffer)
   (assert (> (length (buffer-buf buffer)) 0))
