@@ -54,12 +54,11 @@
     (append (scheduler-buf scheduler) (list packet))))
 
 (define (incClkFor-scheduler! scheduler)
-  ;(unless (equal? 0 (length (scheduler-buf scheduler)))
+  (unless (equal? 0 (length (scheduler-buf scheduler)))
     (if (equal? 0 (scheduler-cycleForNext scheduler))
       (begin (set-scheduler-buf! scheduler (rest (scheduler-buf scheduler)))
              (set-scheduler-cycleForNext! scheduler (scheduler-interval scheduler)))
-      (set-scheduler-cycleForNext! scheduler (- (scheduler-cycleForNext scheduler) 1)));)
-)
+      (set-scheduler-cycleForNext! scheduler (- (scheduler-cycleForNext scheduler) 1)))))
 
 ;(match-define (list a b) (f))
 ;(do-something-with a b)
