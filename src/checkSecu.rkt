@@ -8,11 +8,15 @@
 
   ;(define state1 (init-state (bitvector->natural sec1) (bitvector->natural pub) (bitvector->natural recv) 2))
   (define state1 (init-state 100 100 (bitvector->natural recv) 2))
+  (println "init state1")
+  (println state1)
   (define observation1 (init-observation))
   (simu state1 observation1 MAXCLK)
 
   ;(define state2 (init-state (bitvector->natural sec2) (bitvector->natural pub) (bitvector->natural recv) 2))
   (define state2 (init-state 100 100 (bitvector->natural recv) 2))
+  (println "init state2")
+  (println state2)
   (define observation2 (init-observation))
   (simu state2 observation2 MAXCLK)
 

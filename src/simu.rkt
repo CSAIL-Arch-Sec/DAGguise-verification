@@ -33,7 +33,7 @@
   (let [(packet_Shaper (dagState-req dagState_Shaper))]
     (unless (void? packet_Shaper)
       (begin
-        (when (and (not (equal? (void) (buffer-head buffer_Tx)))
+        (when (and (not (void? (buffer-head buffer_Tx)))
                    (equal? (packet-tag (buffer-head buffer_Tx)) (packet-tag packet_Shaper)))
           (let ([packet_Tx (popFrom-buffer! buffer_Tx)])
             (set-packet-address! packet_Shaper (packet-address packet_Tx))
@@ -47,21 +47,21 @@
   ; shaper/receiver to scheduler
   (match-define (list accept_Shaper accept_Rx)
     (scheduler-canAccept scheduler
-      (not (equal? (void) (buffer-head buffer_Shaper)))
-      (not (equal? (void) (buffer-head buffer_Rx)))))
+      (not (void? (buffer-head buffer_Shaper)))
+      (not (void? (buffer-head buffer_Rx)))))
   (when accept_Shaper (simuReqFor-scheduler! scheduler (popFrom-buffer! buffer_Shaper)))
   (when accept_Rx (simuReqFor-scheduler! scheduler (popFrom-buffer! buffer_Rx)))
 
   ; scheduler to shaper/receiver
   (match-define (list resp_Shaper resp_Rx) (scheduler-resp scheduler))
-  (unless (equal? (void) resp_Shaper)
+  (unless (void? resp_Shaper)
     (begin
       (simuRespFor-dagState! dagState_Shaper (packet-vertexID resp_Shaper))
       (let ([vertexID_Tx (extractTxFrom-vertexMap! vertexMap (packet-vertexID resp_Shaper))])
-        (if (equal? (void) vertexID_Tx)
+        (if (void? vertexID_Tx)
           (void)
           (simuRespFor-dagState! dagState_Shaper vertexID_Tx)))))
-  (unless (equal? (void) resp_Rx)
+  (unless (void? resp_Rx)
     (begin
       (simuRespFor-dagState! dagState_Rx (packet-vertexID resp_Rx))
       (addLogTo-observation! observation clk)))
