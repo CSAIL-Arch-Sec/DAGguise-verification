@@ -37,7 +37,7 @@
     (define (update-guardKey guardKey)
       (append
         (list (expr-simple (car guardKey) DEBUG_SYMOPT))
-        (map packet-simple (rest guardKey))))
+        (map (lambda (x) (packet-simple x DEBUG_SYMOPT)) (rest guardKey))))
     (define union-contents-old (union-contents (scheduler-buf scheduler)))
     (define union-contents-new (map update-guardKey union-contents-old))
     

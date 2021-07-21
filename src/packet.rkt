@@ -11,7 +11,6 @@
 
 (define CORE_Shaper 0)
 (define CORE_Rx 1)
-(define DEBUG_SYMOPT #f)
 
 
 ;coreID - who send this packet
@@ -21,7 +20,7 @@
 (struct packet (coreID vertexID address tag) #:mutable #:transparent)
 
 
-(define (packet-simple complexPacket)
+(define (packet-simple complexPacket DEBUG_SYMOPT)
   (if (void? complexPacket)
     complexPacket
     (packet

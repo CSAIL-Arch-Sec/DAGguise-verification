@@ -31,7 +31,7 @@
       (define (guardKey-simple guardKey)
         (cons
           (expr-simple (car guardKey) DEBUG_SYMOPT)
-          (packet-simple (cdr guardKey))))
+          (packet-simple (cdr guardKey) DEBUG_SYMOPT)))
       (define union-contents-old (union-contents union))
       (define union-contents-new (map guardKey-simple union-contents-old))
       (set-union-contents! union union-contents-new)))
