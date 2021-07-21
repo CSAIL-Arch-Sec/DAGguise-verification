@@ -5,7 +5,6 @@
 - add document with Scribble
 - change vertexMap and buffer to set
 - undo the change to Rosette source code
-- why second symbolic simu is faster to be optimized
 
 ## Name Conventions
 

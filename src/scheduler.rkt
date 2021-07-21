@@ -71,12 +71,13 @@
   )
 
 (define (scheduler-resp scheduler)
-  (if (equal? 0 (scheduler-cycleForNext scheduler))
+  (if (&& (< 0 (length (scheduler-buf scheduler)))
+          (equal? 0 (scheduler-cycleForNext scheduler)))
     (let ([packet (first (scheduler-buf scheduler))])
       (cond
         [(equal? CORE_Shaper (packet-coreID packet)) (list packet (void))]
         [(equal? CORE_Rx (packet-coreID packet)) (list (void) packet)]
-        [else (assert #f)])) ;TODO: why need this assume?
+        [else (assert #f)]))
     (list (void) (void))))
 
 

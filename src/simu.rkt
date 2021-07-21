@@ -54,6 +54,14 @@
 
   ; scheduler to shaper/receiver
   (match-define (list resp_Shaper resp_Rx) (scheduler-resp scheduler))
+
+  ; NOTE: After the above line, some assert() is implicitly added into vc.
+  ;       This assert is about at least one of the union guards(conditions) should hold.
+  ;       This should be fine because these assert should be (and confirmed to be) always true.
+  ; NOTE: Further more, these assert() will be carried on to the simulation for secret1.
+  ;       This should also be fine.
+  ; NOTE: In general, these assert() seems to be used to help simplify other symbolic expressions.
+  
   (unless (void? resp_Shaper)
     (begin
       (simuRespFor-dagState! dagState_Shaper (packet-vertexID resp_Shaper))
