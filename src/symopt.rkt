@@ -21,11 +21,12 @@
       (begin
         (when printDebug (println "J****************"))
         (define gvs-new 
-          (filter (lambda (gv) (not (equal? #f (car gv))))
-            (map (lambda (gv) (match gv [(expression (== ⊢) g v) (cons (expr-simple g printDebug) (expr-simple v printDebug))] [v v]))
+          (filter (lambda (gv) (not (eqv? #f (car gv))))
+            (map (lambda (gv) (match gv [(expression (== ⊢) g v) (begin
+                (cons (expr-simple g printDebug) (expr-simple v printDebug)))]))
               gvs)))
         (if (< 0 (length gvs-new))
-          (apply ite* gvs-new )
+          (apply ite* gvs-new)
           (void)))
     ]
 
