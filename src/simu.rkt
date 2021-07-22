@@ -94,8 +94,8 @@
   (symopt-scheduler! scheduler)
 
   ; recursive next cycle
-  (println "state")
-  (println state)
+  (print "state-") (println (state-clk state))
+  ;(println state)
   ;(println "scheduler")
   ;(println scheduler)
   ;(println observation)
