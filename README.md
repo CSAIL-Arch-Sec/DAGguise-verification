@@ -4,7 +4,8 @@
 
 - add document with Scribble
 - change vertexMap and buffer to set
-- undo the change to Rosette source code
+- implement multi-bank
+- implement k-induction
 
 ## Name Conventions
 
