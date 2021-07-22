@@ -31,6 +31,9 @@
   (when DEBUG_SYMOPT (println "before symopt: symopt-dagState!"))
   (when DEBUG_SYMOPT (println dagState))
 
+  (set-dagState-respHistory! dagState (expr-simple (dagState-respHistory dagState) DEBUG_SYMOPT))
+  (set-dagState-vertexID! dagState (expr-simple (dagState-vertexID dagState) DEBUG_SYMOPT))
+
   (when DEBUG_SYMOPT (println "after symopt: symopt-dagState!"))
   (when DEBUG_SYMOPT (println dagState))
   (when DEBUG_SYMOPT (println "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"))
