@@ -12,6 +12,8 @@
 
 (error-print-width 1000000)
 
+(define DEBUG_SYMOPT #f)
+
 
 (define (simu state observation MAXCLK)
   ; nickname (NOTE: this will not be updated within this clk)
@@ -26,22 +28,22 @@
   (define scheduler (state-scheduler state))
 
   ; in transmitter
-  (let ([packet (dagState-req dagState_Tx)])
+  (let ([packet (packet-simple (dagState-req dagState_Tx) DEBUG_SYMOPT)])
     (unless (void? packet) (pushTo-buffer! buffer_Tx packet)))
 
   ; transmitter to shaper
-  (let [(packet_Shaper (dagState-req dagState_Shaper))]
-    (unless (void? packet_Shaper)
+  (let [(packet (packet-simple (dagState-req dagState_Shaper) DEBUG_SYMOPT))]
+    (unless (void? packet)
       (begin
         (when (and (not (void? (buffer-head buffer_Tx)))
-                   (equal? (packet-tag (buffer-head buffer_Tx)) (packet-tag packet_Shaper)))
+                   (equal? (packet-tag (buffer-head buffer_Tx)) (packet-tag packet)))
           (let ([packet_Tx (popFrom-buffer! buffer_Tx)])
-            (set-packet-address! packet_Shaper (packet-address packet_Tx))
-            (addTxTo-vertexMap! vertexMap (packet-vertexID packet_Tx) (packet-vertexID packet_Shaper))))
-        (pushTo-buffer! buffer_Shaper packet_Shaper))))
+            (set-packet-address! packet (packet-address packet_Tx))
+            (addTxTo-vertexMap! vertexMap (packet-vertexID packet_Tx) (packet-vertexID packet))))
+        (pushTo-buffer! buffer_Shaper packet))))
 
   ; in receiver
-  (let ([packet (dagState-req dagState_Rx)])
+  (let ([packet (packet-simple (dagState-req dagState_Rx) DEBUG_SYMOPT)])
     (unless (void? packet) (pushTo-buffer! buffer_Rx packet)))
 
   ; shaper/receiver to scheduler
