@@ -43,6 +43,12 @@
     
     (set-union-contents! (scheduler-buf scheduler) union-contents-new))
 
+  (when DEBUG_SYMOPT (println "--------------------------------------------------"))
+  (when DEBUG_SYMOPT (println "before symopt: symopt-scheduler!"))
+  (when DEBUG_SYMOPT (println scheduler))
+
+  (set-scheduler-cycleForNext! scheduler (expr-simple (scheduler-cycleForNext scheduler) DEBUG_SYMOPT))
+
   (when DEBUG_SYMOPT (println "after symopt: symopt-scheduler!"))
   (when DEBUG_SYMOPT (println scheduler))
   (when DEBUG_SYMOPT (println "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"))

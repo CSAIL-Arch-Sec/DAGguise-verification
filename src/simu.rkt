@@ -74,6 +74,7 @@
       (simuRespFor-dagState! dagState_Rx (packet-vertexID resp_Rx))
       (addLogTo-observation! observation clk)))
 
+  (symopt-scheduler! scheduler)
   ; update clk
   (set-state-clk! state (+ 1 clk))
   (incClkFor-dagState! dagState_Tx)
