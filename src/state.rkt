@@ -26,10 +26,10 @@
     dagState_Rx buffer_Rx 
     scheduler)
   #:mutable #:transparent)
-(define (init-state interval_Tx interval_Shaper interval_Rx interval_SCH) (state
+(define (init-state dagState_Tx dagState_Shaper dagState_Rx interval_SCH) (state
   0
-  (init-dagState CORE_Shaper interval_Tx) (init-buffer)
-  (init-dagState CORE_Shaper interval_Shaper) (init-buffer) (init-vertexMap)
-  (init-dagState CORE_Rx interval_Rx) (init-buffer)
+  dagState_Tx (init-buffer)
+  dagState_Shaper (init-buffer) (init-vertexMap)
+  dagState_Rx (init-buffer)
   (init-scheduler interval_SCH)))
 

@@ -8,8 +8,13 @@ digraph G {
 
 
   "packet" -> "buffer";
-  "packet" -> "dagState";
+  "packet" -> "dagStateFixRate";
+  "packet" -> "dagStateUninter";
   "packet" -> "scheduler";
+
+  "dagStateFixRate" -> "dagState";
+  "dagStateUninter" -> "dagState";
+  
 
   "dagState" -> "state";
   "buffer" -> "state";

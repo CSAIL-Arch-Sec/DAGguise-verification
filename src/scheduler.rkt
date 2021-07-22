@@ -24,7 +24,7 @@
 ;cycleForNext - will send a response after cycleForNext
 ;interval - const - send response every interval cycles
 (struct scheduler (buf cycleForNext interval) #:mutable #:transparent)
-(define (init-scheduler interval) (scheduler (list) interval (- interval 1))) ;TODO: this is a hack to get good response interval
+(define (init-scheduler interval) (scheduler (list) interval interval)) ;TODO: this is a hack to get good response interval
 
 
 (define (symopt-scheduler! scheduler)

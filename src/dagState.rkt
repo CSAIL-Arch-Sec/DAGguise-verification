@@ -1,9 +1,13 @@
 #lang rosette
 
-(require "packet.rkt" "symopt.rkt")
+(require
+  "packet.rkt"
+  (prefix-in fixRate: "dagStateFixRate.rkt")
+  (prefix-in uninter: "dagStateUninter.rkt"))
 
 (provide
-  init-dagState
+  fixRate:init-dagState
+  uninter:init-dagState
 
   symopt-dagState!
   simuRespFor-dagState!
@@ -12,61 +16,53 @@
   
   (all-from-out "packet.rkt"))
 
-(define DEBUG_SYMOPT #f)
 
+(define (symopt-dagState! . args)
+  (match (car args)
+    [(struct fixRate:dagState _) (apply fixRate:symopt-dagState! args)]
+    [(struct uninter:dagState _) (apply uninter:symopt-dagState! args)])
+)
 
-;cycleForNext - will send a request after cycleForNext
-;vertexID - the ID of next sent request, unique for each req/resp pair
-;coreID - const - all sent packet will be labeled with coreID, unique for each core/dag
-;interval - const - send request every interval cycles
-(struct dagState (cycleForNext vertexID coreID interval) #:mutable #:transparent)
-(define (init-dagState coreID interval) (dagState interval 0 coreID interval))
+(define (simuRespFor-dagState! . args)
+  (match (car args)
+    [(struct fixRate:dagState _) (apply fixRate:simuRespFor-dagState! args)]
+    [(struct uninter:dagState _) (apply uninter:simuRespFor-dagState! args)])
+)
 
+(define (incClkFor-dagState! . args)
+  (match (car args)
+    [(struct fixRate:dagState _) (apply fixRate:incClkFor-dagState! args)]
+    [(struct uninter:dagState _) (apply uninter:incClkFor-dagState! args)])
+)
 
-(define (symopt-dagState! dagState)
-
-  (when DEBUG_SYMOPT (println "--------------------------------------------------"))
-  (when DEBUG_SYMOPT (println "before symopt: symopt-dagState!"))
-  (when DEBUG_SYMOPT (println dagState))
-
-  (set-dagState-cycleForNext! dagState (expr-simple (dagState-cycleForNext dagState) DEBUG_SYMOPT))
-  (set-dagState-vertexID! dagState (expr-simple (dagState-vertexID dagState) DEBUG_SYMOPT))
-
-  (when DEBUG_SYMOPT (println "after symopt: symopt-dagState!"))
-  (when DEBUG_SYMOPT (println dagState))
-  (when DEBUG_SYMOPT (println "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"))
+(define (dagState-req . args)
+  (match (car args)
+    [(struct fixRate:dagState _) (apply fixRate:dagState-req args)]
+    [(struct uninter:dagState _) (apply uninter:dagState-req args)])
 )
 
 
-(define (simuRespFor-dagState! dagState vertexID)
-  (void))
-
-(define (incClkFor-dagState! dagState)
-  (if (equal? 0 (dagState-cycleForNext dagState))
-    (set-dagState-cycleForNext! dagState (dagState-interval dagState))
-    (set-dagState-cycleForNext! dagState (- (dagState-cycleForNext dagState) 1))))
-
-(define (dagState-req dagState)
-  (if (equal? 0 (dagState-cycleForNext dagState))
-    (begin
-      (set-dagState-vertexID! dagState (+ 1 (dagState-vertexID dagState)))
-      (packet (dagState-coreID dagState) (dagState-vertexID dagState) 0 0))
-    (void)))
-
-
 (define (testMe)
-  (define dagState (init-dagState CORE_Shaper 3))
-  (simuRespFor-dagState! dagState 11111)
+  (define (testDagState dagState)
+    (simuRespFor-dagState! dagState 11111)
+  
+    (println (dagState-req dagState))
+    (incClkFor-dagState! dagState)
+    (println (dagState-req dagState))
+    (incClkFor-dagState! dagState)
+    (println (dagState-req dagState))
+    (incClkFor-dagState! dagState)
+    (println (dagState-req dagState))
+    (incClkFor-dagState! dagState)
+    (println (dagState-req dagState))
+    (incClkFor-dagState! dagState))
 
-  (println (dagState-req dagState))
-  (incClkFor-dagState! dagState)
-  (println (dagState-req dagState))
-  (incClkFor-dagState! dagState)
-  (println (dagState-req dagState))
-  (incClkFor-dagState! dagState)
-  (println (dagState-req dagState))
-  (incClkFor-dagState! dagState)
-  (println (dagState-req dagState))
-  (incClkFor-dagState! dagState))
+  (define dagState1 (fixRate:init-dagState 22 3))
+  (testDagState dagState1)
+
+  (println "------------------")
+
+  (define dagState2 (uninter:init-dagState 22))
+  (testDagState dagState2))
 
 ;(testMe)
