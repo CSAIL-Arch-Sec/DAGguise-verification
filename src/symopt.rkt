@@ -7,12 +7,18 @@
 (define (expr-simple expr printDebug)
   (match expr
     [v #:when (not (term? v)) v]
-    [(expression (== &&) x y) #:when (unsat? (verify (assert y))) (begin (when printDebug (println "A*****************")) (expr-simple x printDebug))]
-    [(expression (== &&) x y) #:when (unsat? (verify (assert (not y)))) (begin (when printDebug (println "B*****************")) #f)]
+    [v #:when (&& (boolean? v) (unsat? (verify (assert v)))) (begin (when printDebug (println "K*****************")) (when printDebug (println expr)) #t)]
+    [v #:when (&& (boolean? v) (unsat? (verify (assert (not v))))) (begin (when printDebug (println "L*****************")) #f)]
+    ;[v #:when (&& (boolean? v) (unsat? (verify (assert (equal? () v))))) (begin (when printDebug (println "L*****************")) #f)]
+
+    [(expression (== &&) x y) #:when (unsat? (verify (assert (|| (not x) y)))) (begin (when printDebug (println "A*****************")) (expr-simple x printDebug))]
+    [(expression (== &&) x y) #:when (unsat? (verify (assert (|| (not y) x)))) (begin (when printDebug (println "B*****************")) (expr-simple y printDebug))]
     [(expression (== &&) x y) (&& (expr-simple x printDebug) (expr-simple y printDebug))]
-    [(expression (== ||) x y) #:when (unsat? (verify (assert y))) (begin (when printDebug (println "C*****************")) #t)]
-    [(expression (== ||) x y) #:when (unsat? (verify (assert (not y)))) (begin (when printDebug (println "D*****************")) (expr-simple x printDebug))]
+
+    [(expression (== ||) x y) #:when (unsat? (verify (assert (|| (not x) y)))) (begin (when printDebug (println "C*****************")) (expr-simple y printDebug))]
+    [(expression (== ||) x y) #:when (unsat? (verify (assert (|| (not y) x)))) (begin (when printDebug (println "D*****************")) (expr-simple x printDebug))]
     [(expression (== ||) x y) (|| (expr-simple x printDebug) (expr-simple y printDebug))]
+
     [(expression (== ite) x y z) #:when (unsat? (verify (assert (equal? 0 (ite x y z))))) (begin (when printDebug (println "E*****************")) 0)]
     [(expression (== ite) x y z) #:when (unsat? (verify (assert x))) (begin (when printDebug (println "F*****************")) (expr-simple y printDebug))]
     [(expression (== ite) x y z) #:when (unsat? (verify (assert (not x)))) (begin (when printDebug (println "G*****************")) (expr-simple z printDebug))]
