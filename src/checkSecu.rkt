@@ -3,11 +3,10 @@
 (require "simu.rkt")
 
 
-(define (checkSecu)
-  (define MAXCLK 10)
+(define (checkSecu HIST_SIZE MAXCLK)
   (define bitWidth 2) (define-symbolic sec1 sec2 pub recv sched (bitvector bitWidth))
-  (define HIST_SIZE 10) (define-symbolic secPro1 secPro2 pubPro recvPro schedPro
-                                         debug1Pro debug2Pro (~> (bitvector HIST_SIZE) boolean?))
+  (define-symbolic secPro1 secPro2 pubPro recvPro schedPro
+                   debug1Pro debug2Pro (~> (bitvector HIST_SIZE) boolean?))
 
 
   (define state1 (init-state
@@ -27,9 +26,9 @@
     ;(fixRate:init-scheduler sched)
     (uninter:init-scheduler schedPro HIST_SIZE)
   ))
-  (println "init state1") (println state1)
+  ;(println "init state1") (println state1)
   (define observation1 (init-observation)) (simu state1 observation1 MAXCLK)
-
+  (println "---------------------------")
 
   (define state2 (init-state
     ;(fixRate:init-dagState CORE_Shaper 100)
@@ -48,16 +47,32 @@
     ;(fixRate:init-scheduler sched)
     (uninter:init-scheduler schedPro HIST_SIZE)
   ))
-  (println "init state2") (println state2)
+  ;(println "init state2") (println state2)
   (define observation2 (init-observation)) (simu state2 observation2 MAXCLK)
+  (println "---------------------------")
 
 
-  (verify (assert (equal? (observation-log observation1) (observation-log observation2))))
+  (define startTime (current-seconds))
+  (println (verify (assert (equal? (observation-log observation1) (observation-log observation2)))))
+  (print "Time for SMT solver: ") (print (/ (- (current-seconds) startTime) 60.0)) (println "min")
 )
 
 
 (define (testMe)
-  (println (checkSecu)))
+  (define arg-hist 10)
+  (define arg-cycle 10)
+  (command-line
+    #:once-each
+    [("--hist")  v "The size of req/resp history for uninterpreted funciton"
+                   (set! arg-hist (string->number v))]
+    [("--cycle") v "Number of cycles to simulate"
+                   (set! arg-cycle (string->number v))]
+  )
+
+
+  (print "Run with args: --hist:") (print arg-hist) (print "  --cycle:") (println arg-cycle)
+  (checkSecu arg-hist arg-cycle)
+)
 
 (testMe)
 

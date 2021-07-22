@@ -16,6 +16,10 @@
 
 
 (define (simu state observation MAXCLK)
+
+  ; timer
+  (define startTime (current-seconds))
+
   ; nickname (NOTE: this will not be updated within this clk)
   (define clk (state-clk state))
   (define dagState_Tx (state-dagState_Tx state))
@@ -94,7 +98,7 @@
   (symopt-scheduler! scheduler)
 
   ; recursive next cycle
-  (print "state-") (println (state-clk state))
+  (print "Time for state-") (print (state-clk state)) (print ": ") (print (/ (- (current-seconds) startTime) 60.0)) (println "min")
   ;(println state)
   ;(println "scheduler")
   ;(println scheduler)
