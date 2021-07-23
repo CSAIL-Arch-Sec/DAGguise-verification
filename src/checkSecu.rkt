@@ -24,7 +24,9 @@
     (uninter:init-dagState CORE_Rx recvPro HIST_SIZE)
 
     (fixRate:init-scheduler 1)
+    ;(fixRateVec:init-scheduler 1)
     ;(fixRate:init-scheduler (bitvector->natural sched))
+    ;(fixRateVec:init-scheduler (bitvector->natural sched))
     ;(uninter:init-scheduler schedPro HIST_SIZE)
   ))
   ;(println "init state1") (println state1)
@@ -45,7 +47,9 @@
     (uninter:init-dagState CORE_Rx recvPro HIST_SIZE)
 
     (fixRate:init-scheduler 1)
+    ;(fixRateVec:init-scheduler 1)
     ;(fixRate:init-scheduler (bitvector->natural sched))
+    ;(fixRateVec:init-scheduler (bitvector->natural sched))
     ;(uninter:init-scheduler schedPro HIST_SIZE)
   ))
   ;(println "init state2") (println state2)

@@ -3,7 +3,6 @@
 ## TODOs
 
 - add document with Scribble
-- change vertexMap and buffer to set
 - implement multi-bank
 - implement k-induction
 
