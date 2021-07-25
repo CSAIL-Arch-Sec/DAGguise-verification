@@ -86,7 +86,7 @@
   ; TODO: should set into a compete symbolic state
   (define-symbolic respHistory_Tx1 respHistory_Tx2 respHistory_Rx1 respHistory_Rx2 (bitvector HIST_SIZE))
   (define-symbolic cycleForNext_Shaper1 cycleForNext_Shaper2 (bitvector 2))
-  (define-symbolic vertexID_Tx1 vertexID_Tx2 vertexID_Shaper1 vertexID_Shaper2 vertexID_Rx1 vertexID_Rx2 (bitvector 32))
+  (define-symbolic vertexID_Tx1 vertexID_Tx2 vertexID_Shaper1 vertexID_Shaper2 vertexID_Rx1 vertexID_Rx2 (bitvector 8))
   (define (set-state! state respHistory_Tx vertexID_Tx
                             cycleForNext_Shaper vertexID_Shaper
                             respHistory_Rx vertexID_Rx)
@@ -124,7 +124,8 @@
   (simu state2 0)
 
   (define startTime (current-seconds))
-  (println (verify (assert (equal? (dagState-respHistory (state-dagState_Rx state1)) (dagState-respHistory (state-dagState_Rx state2))))))
+  (println (verify (assert (equal? (extract 1 1 (dagState-respHistory (state-dagState_Rx state1)))
+                                   (extract 1 1 (dagState-respHistory (state-dagState_Rx state2)))))))
   (print "Time for SMT solver: ") (print (/ (- (current-seconds) startTime) 60.0)) (println "min")
 )
 

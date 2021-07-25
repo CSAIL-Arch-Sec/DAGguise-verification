@@ -25,8 +25,9 @@
 
 ; For K induction
 (define (set-dagState! dagState respHistory vertexID)
-  (set-dagState-vertexID! dagState vertexID))
   (set-dagState-respHistory! dagState (zero-extend respHistory (bitvector (dagState-OBSERVE_SIZE dagState))))
+  (set-dagState-vertexID! dagState vertexID)
+)
 
 
 (define (symopt-dagState! dagState)

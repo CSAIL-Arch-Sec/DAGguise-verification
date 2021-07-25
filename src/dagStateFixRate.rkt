@@ -25,7 +25,8 @@
 ; For K induction
 (define (set-dagState! dagState cycleForNext vertexID)
   (set-dagState-cycleForNext! dagState cycleForNext)
-  (set-dagState-vertexID! dagState vertexID))
+  (set-dagState-vertexID! dagState vertexID)
+)
 
 
 (define (symopt-dagState! dagState)
