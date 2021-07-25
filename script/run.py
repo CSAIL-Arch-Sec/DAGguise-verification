@@ -10,8 +10,11 @@ NUM_MULTIPROC_THREAD = None # use `None` to automatically detect num_cores on th
 
 #-------------------- 2/2 Sweep Param Config Begin --------------------
 experimentList = []
-for i in range(1, 10):
-  experimentList.append([i, i, i]) #[index, hist, cycle]
+i = 0
+for cycle in range(13, 21):
+  for hist in range(2, 10):
+    i += 1
+    experimentList.append([i, hist, cycle]) #[index, hist, cycle]
 #-------------------- 2/2 Sweep Param End --------------------
 
 

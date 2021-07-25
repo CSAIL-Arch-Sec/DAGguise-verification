@@ -5,6 +5,7 @@
 (provide
   (struct-out dagState)
   init-dagState
+  set-dagState!
 
   symopt-dagState!
   simuRespFor-dagState!
@@ -20,6 +21,11 @@
 ;interval - const - send request every interval cycles
 (struct dagState (cycleForNext vertexID coreID interval) #:mutable #:transparent)
 (define (init-dagState coreID interval) (dagState interval 0 coreID interval))
+
+; For K induction
+(define (set-dagState! dagState cycleForNext vertexID)
+  (set-dagState-cycleForNext! dagState cycleForNext)
+  (set-dagState-vertexID! dagState vertexID))
 
 
 (define (symopt-dagState! dagState)

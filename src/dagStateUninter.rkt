@@ -5,6 +5,7 @@
 (provide
   (struct-out dagState)
   init-dagState
+  set-dagState!
 
   symopt-dagState!
   simuRespFor-dagState!
@@ -21,6 +22,11 @@
 ;HIST_SIZE - const - the length of respHistory.
 (struct dagState (respHistory vertexID coreID reqFunc HIST_SIZE) #:mutable #:transparent)
 (define (init-dagState coreID reqFunc HIST_SIZE) (dagState (bv 0 HIST_SIZE) 0 coreID reqFunc HIST_SIZE))
+
+; For K induction
+(define (set-dagState! dagState respHistory vertexID)
+  (set-dagState-respHistory! dagState respHistory)
+  (set-dagState-vertexID! dagState vertexID))
 
 
 (define (symopt-dagState! dagState)

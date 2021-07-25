@@ -7,7 +7,9 @@
 
 (provide
   fixRate:init-dagState
+  fixRate:set-dagState!
   uninter:init-dagState
+  uninter:set-dagState!
 
   symopt-dagState!
   simuRespFor-dagState!
