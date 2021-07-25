@@ -15,6 +15,7 @@
   simuRespFor-dagState!
   incClkFor-dagState!
   dagState-req
+  dagState-respHistory
   
   (all-from-out "packet.rkt"))
 
@@ -41,6 +42,11 @@
   (match (car args)
     [(struct fixRate:dagState _) (apply fixRate:dagState-req args)]
     [(struct uninter:dagState _) (apply uninter:dagState-req args)])
+)
+
+(define (dagState-respHistory . args)
+  (match (car args)
+    [(struct uninter:dagState _) (apply uninter:dagState-respHistory args)])
 )
 
 

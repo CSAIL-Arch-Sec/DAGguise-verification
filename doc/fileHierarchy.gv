@@ -26,7 +26,6 @@ digraph G {
   "scheduler" -> "state";
 
   "state" -> "simu";
-  "observation" -> "simu";
 
   "simu" -> "checkSecu";
 }

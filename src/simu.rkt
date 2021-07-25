@@ -1,21 +1,18 @@
 #lang rosette
 
-(require
-  "state.rkt"
-  "observation.rkt")
+(require "state.rkt")
 
 (provide
   simu
   
-  (all-from-out "state.rkt")
-  (all-from-out "observation.rkt"))
+  (all-from-out "state.rkt"))
 
 (error-print-width 1000000)
 
 (define DEBUG_SYMOPT #f)
 
 
-(define (simu state observation MAXCLK)
+(define (simu state MAXCLK)
 
   ; timer
   (define startTime (current-seconds))
@@ -76,9 +73,7 @@
           (void)
           (simuRespFor-dagState! dagState_Shaper vertexID_Tx)))))
   (unless (void? resp_Rx)
-    (begin
-      (simuRespFor-dagState! dagState_Rx (packet-vertexID resp_Rx))
-      (addLogTo-observation! observation clk)))
+    (simuRespFor-dagState! dagState_Rx (packet-vertexID resp_Rx)))
 
   (symopt-scheduler! scheduler)
   ; update clk
@@ -102,14 +97,12 @@
   ;(println state)
   ;(println "scheduler")
   ;(println scheduler)
-  ;(println observation)
-  (unless (equal? 0 MAXCLK) (simu state observation (- MAXCLK 1))))
+  (unless (equal? 0 MAXCLK) (simu state (- MAXCLK 1))))
 
 
 (define (testMe)
   (define state (concrete:init-state 3 3 3 6))
-  (define observation (init-observation))
-  (simu state observation 100))
+  (simu state 100))
 
 ;(testMe)
 

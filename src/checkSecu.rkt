@@ -13,7 +13,7 @@
   (define state1 (concrete:init-state
     ;(fixRate:init-dagState CORE_Shaper 100)
     ;(fixRate:init-dagState CORE_Shaper (bitvector->natural sec1))
-    (uninter:init-dagState CORE_Shaper secPro1 HIST_SIZE)
+    (uninter:init-dagState CORE_Shaper secPro1 HIST_SIZE HIST_SIZE)
 
     (fixRate:init-dagState CORE_Shaper 3)
     ;(fixRate:init-dagState CORE_Shaper (bitvector->natural pub))
@@ -21,7 +21,7 @@
 
     ;(fixRate:init-dagState CORE_Rx 100)
     ;(fixRate:init-dagState CORE_Rx (bitvector->natural recv))
-    (uninter:init-dagState CORE_Rx recvPro HIST_SIZE)
+    (uninter:init-dagState CORE_Rx recvPro HIST_SIZE MAXCLK)
 
     (fixRate:init-scheduler 1)
     ;(fixRateVec:init-scheduler 1)
@@ -30,13 +30,13 @@
     ;(uninter:init-scheduler schedPro HIST_SIZE)
   ))
   ;(println "init state1") (println state1)
-  (define observation1 (init-observation)) (simu state1 observation1 MAXCLK)
+  (simu state1 MAXCLK)
   (println "---------------------------")
 
   (define state2 (concrete:init-state
     ;(fixRate:init-dagState CORE_Shaper 100)
     ;(fixRate:init-dagState CORE_Shaper (bitvector->natural sec2))
-    (uninter:init-dagState CORE_Shaper secPro2 HIST_SIZE)
+    (uninter:init-dagState CORE_Shaper secPro2 HIST_SIZE HIST_SIZE)
 
     (fixRate:init-dagState CORE_Shaper 3)
     ;(fixRate:init-dagState CORE_Shaper (bitvector->natural pub))
@@ -44,7 +44,7 @@
 
     ;(fixRate:init-dagState CORE_Rx 100)
     ;(fixRate:init-dagState CORE_Rx (bitvector->natural recv))
-    (uninter:init-dagState CORE_Rx recvPro HIST_SIZE)
+    (uninter:init-dagState CORE_Rx recvPro HIST_SIZE MAXCLK)
 
     (fixRate:init-scheduler 1)
     ;(fixRateVec:init-scheduler 1)
@@ -53,12 +53,12 @@
     ;(uninter:init-scheduler schedPro HIST_SIZE)
   ))
   ;(println "init state2") (println state2)
-  (define observation2 (init-observation)) (simu state2 observation2 MAXCLK)
+  (simu state2 MAXCLK)
   (println "---------------------------")
 
 
   (define startTime (current-seconds))
-  (println (verify (assert (equal? (observation-log observation1) (observation-log observation2)))))
+  (println (verify (assert (equal? (dagState-respHistory (state-dagState_Rx state1)) (dagState-respHistory (state-dagState_Rx state2))))))
   (print "Time for SMT solver: ") (print (/ (- (current-seconds) startTime) 60.0)) (println "min")
 )
 
@@ -66,19 +66,18 @@
 (define (checkSecuInduct HIST_SIZE MAXCLK)
 
   ; STEP1: init the state
-  (define-symbolic secPro1 secPro2 recvPro
-                   debug1Pro debug2Pro (~> (bitvector HIST_SIZE) boolean?))
+  (define-symbolic secPro1 secPro2 recvPro (~> (bitvector HIST_SIZE) boolean?))
   
   (define state1 (concrete:init-state
-    (uninter:init-dagState CORE_Shaper secPro1 HIST_SIZE)
+    (uninter:init-dagState CORE_Shaper secPro1 HIST_SIZE HIST_SIZE)
     (fixRate:init-dagState CORE_Shaper 3)
-    (uninter:init-dagState CORE_Rx recvPro HIST_SIZE)
+    (uninter:init-dagState CORE_Rx recvPro HIST_SIZE MAXCLK)
     (fixRate:init-scheduler 1)
   ))
   (define state2 (concrete:init-state
-    (uninter:init-dagState CORE_Shaper secPro2 HIST_SIZE)
+    (uninter:init-dagState CORE_Shaper secPro2 HIST_SIZE HIST_SIZE)
     (fixRate:init-dagState CORE_Shaper 3)
-    (uninter:init-dagState CORE_Rx recvPro HIST_SIZE)
+    (uninter:init-dagState CORE_Rx recvPro HIST_SIZE MAXCLK)
     (fixRate:init-scheduler 1)
   ))
 
@@ -109,25 +108,23 @@
   ; STEP3: assume for some cycles
   (println "---------------------------")
   (println "assume K cycles")
-  (define (assumeK state1 observation1 state2 observation2 MAXCLK)
-    (simu state1 observation1 0)
-    (simu state2 observation2 0)
-    (unless (equal? 0 MAXCLK) (assumeK state1 observation1 state2 observation2 (- MAXCLK 1)))
+  (define (assumeK state1 state2 MAXCLK)
+    (simu state1 0)
+    (simu state2 0)
+    (unless (equal? 0 MAXCLK) (assumeK state1 state2 (- MAXCLK 1)))
   )
-  (define observation1 (init-observation))
-  (define observation2 (init-observation))
-  (assumeK state1 observation1 state2 observation2 MAXCLK)
-  (assume (assert (equal? (observation-log observation1) (observation-log observation2))))
+  (assumeK state1 state2 MAXCLK)
+  (assume (equal? (dagState-respHistory (state-dagState_Rx state1)) (dagState-respHistory (state-dagState_Rx state2))))
 
 
   ; STEP4: assert for 1 cycle
   (println "---------------------------")
   (println "assert 1 cycle")
-  (simu state1 observation1 0)
-  (simu state2 observation2 0)
+  (simu state1 0)
+  (simu state2 0)
 
   (define startTime (current-seconds))
-  (println (verify (assert (equal? (observation-log observation1) (observation-log observation2)))))
+  (println (verify (assert (equal? (dagState-respHistory (state-dagState_Rx state1)) (dagState-respHistory (state-dagState_Rx state2))))))
   (print "Time for SMT solver: ") (print (/ (- (current-seconds) startTime) 60.0)) (println "min")
 )
 

@@ -20,13 +20,13 @@
 ;vertexID - the ID of next sent request, unique for each req/resp pair
 ;coreID - const - all sent packet will be labeled with coreID, unique for each core/dag
 ;HIST_SIZE - const - the length of respHistory.
-(struct dagState (respHistory vertexID coreID reqFunc HIST_SIZE) #:mutable #:transparent)
-(define (init-dagState coreID reqFunc HIST_SIZE) (dagState (bv 0 HIST_SIZE) 0 coreID reqFunc HIST_SIZE))
+(struct dagState (respHistory vertexID coreID reqFunc HIST_SIZE OBSERVE_SIZE) #:mutable #:transparent)
+(define (init-dagState coreID reqFunc HIST_SIZE OBSERVE_SIZE) (dagState (bv 0 OBSERVE_SIZE) 0 coreID reqFunc HIST_SIZE OBSERVE_SIZE))
 
 ; For K induction
 (define (set-dagState! dagState respHistory vertexID)
-  (set-dagState-respHistory! dagState respHistory)
   (set-dagState-vertexID! dagState vertexID))
+  (set-dagState-respHistory! dagState (zero-extend respHistory (bitvector (dagState-OBSERVE_SIZE dagState))))
 
 
 (define (symopt-dagState! dagState)
@@ -46,14 +46,14 @@
 
 (define (simuRespFor-dagState! dagState vertexID)
   (set-dagState-respHistory! dagState
-    (bvor (dagState-respHistory dagState) (bv 1 (dagState-HIST_SIZE dagState)))))
+    (bvor (dagState-respHistory dagState) (bv 1 (dagState-OBSERVE_SIZE dagState)))))
 
 (define (incClkFor-dagState! dagState)
   (set-dagState-respHistory! dagState
-    (bvshl (dagState-respHistory dagState) (bv 1 (dagState-HIST_SIZE dagState)))))
+    (bvshl (dagState-respHistory dagState) (bv 1 (dagState-OBSERVE_SIZE dagState)))))
 
 (define (dagState-req dagState)
-  (if ((dagState-reqFunc dagState) (dagState-respHistory dagState))
+  (if ((dagState-reqFunc dagState) (extract (- (dagState-HIST_SIZE dagState) 1) 0 (dagState-respHistory dagState)))
     (begin
       (set-dagState-vertexID! dagState (+ 1 (dagState-vertexID dagState)))
       (packet (dagState-coreID dagState) (dagState-vertexID dagState) 0 0))
