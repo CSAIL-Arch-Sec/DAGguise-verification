@@ -84,9 +84,9 @@
 
   ; STEP2: set the state with symbolic value
   ; TODO: should set into a compete symbolic state
-  (define-symbolic respHistory_Tx1 respHistory_Tx2 respHistory_Rx1 respHistory_Rx2 (bitvector HIST_SIZE))
+  (define-symbolic respHistory_Tx1 respHistory_Tx2 respHistory_Rx (bitvector HIST_SIZE))
   (define-symbolic cycleForNext_Shaper1 cycleForNext_Shaper2 (bitvector 2))
-  (define-symbolic vertexID_Tx1 vertexID_Tx2 vertexID_Shaper1 vertexID_Shaper2 vertexID_Rx1 vertexID_Rx2 (bitvector 8))
+  (define-symbolic vertexID_Tx1 vertexID_Tx2 vertexID_Shaper1 vertexID_Shaper2 vertexID_Rx (bitvector 4))
   (define (set-state! state respHistory_Tx vertexID_Tx
                             cycleForNext_Shaper vertexID_Shaper
                             respHistory_Rx vertexID_Rx)
@@ -97,15 +97,16 @@
 
   (set-state! state1 respHistory_Tx1 (bitvector->natural vertexID_Tx1)
                      (bitvector->natural cycleForNext_Shaper1) (bitvector->natural vertexID_Shaper1)
-                     respHistory_Rx1 (bitvector->natural vertexID_Rx1))
+                     respHistory_Rx (bitvector->natural vertexID_Rx))
   (set-state! state2 respHistory_Tx2 (bitvector->natural vertexID_Tx2)
                      (bitvector->natural cycleForNext_Shaper2) (bitvector->natural vertexID_Shaper2)
-                     respHistory_Rx2 (bitvector->natural vertexID_Rx2))
+                     respHistory_Rx (bitvector->natural vertexID_Rx))
   ;(println "init state1") (println state1)
   ;(println "init state2") (println state2)
 
 
   ; STEP3: assume for some cycles
+  ; NOTE: HIST_SIZE cycles are implicitly assumed to be secure because we set Rx1 and Rx2 into the same state
   (println "---------------------------")
   (println "assume K cycles")
   (define (assumeK state1 state2 MAXCLK)
