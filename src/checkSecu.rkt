@@ -10,7 +10,7 @@
                    debug1Pro debug2Pro (~> (bitvector HIST_SIZE) boolean?))
 
 
-  (define state1 (init-state
+  (define state1 (concrete:init-state
     ;(fixRate:init-dagState CORE_Shaper 100)
     ;(fixRate:init-dagState CORE_Shaper (bitvector->natural sec1))
     (uninter:init-dagState CORE_Shaper secPro1 HIST_SIZE)
@@ -33,7 +33,7 @@
   (define observation1 (init-observation)) (simu state1 observation1 MAXCLK)
   (println "---------------------------")
 
-  (define state2 (init-state
+  (define state2 (concrete:init-state
     ;(fixRate:init-dagState CORE_Shaper 100)
     ;(fixRate:init-dagState CORE_Shaper (bitvector->natural sec2))
     (uninter:init-dagState CORE_Shaper secPro2 HIST_SIZE)

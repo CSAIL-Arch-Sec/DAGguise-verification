@@ -103,11 +103,11 @@
   ;(println "scheduler")
   ;(println scheduler)
   ;(println observation)
-  (unless (equal? MAXCLK clk) (simu state observation MAXCLK)))
+  (unless (equal? 0 MAXCLK) (simu state observation (- MAXCLK 1))))
 
 
 (define (testMe)
-  (define state (init-state 3 3 3 6))
+  (define state (concrete:init-state 3 3 3 6))
   (define observation (init-observation))
   (simu state observation 100))
 
