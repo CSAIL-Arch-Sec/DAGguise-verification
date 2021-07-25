@@ -12,9 +12,7 @@
   simuReqFor-scheduler!
   incClkFor-scheduler!
   scheduler-canAccept
-  scheduler-resp
-  
-  (all-from-out "packet.rkt"))
+  scheduler-resp)
 
 (define DEBUG_SYMOPT #f)
 

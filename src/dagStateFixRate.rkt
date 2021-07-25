@@ -9,9 +9,7 @@
   symopt-dagState!
   simuRespFor-dagState!
   incClkFor-dagState!
-  dagState-req
-  
-  (all-from-out "packet.rkt"))
+  dagState-req)
 
 (define DEBUG_SYMOPT #f)
 
