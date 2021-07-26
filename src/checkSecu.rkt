@@ -18,7 +18,7 @@
     ;(fixRate:init-dagState CORE_Shaper (bitvector->natural sec1))
     (uninter:init-dagState CORE_Shaper secPro1 HIST_SIZE HIST_SIZE TAG_SIZE)
 
-    (fixRate:init-dagState CORE_Shaper 3 TAG_SIZE)
+    (fixRate:init-dagState CORE_Shaper 2 TAG_SIZE)
     ;(fixRate:init-dagState CORE_Shaper (bitvector->natural pub))
     ;(uninter:init-dagState CORE_Shaper pubPro HIST_SIZE)
 
@@ -41,7 +41,7 @@
     ;(fixRate:init-dagState CORE_Shaper (bitvector->natural sec2))
     (uninter:init-dagState CORE_Shaper secPro2 HIST_SIZE HIST_SIZE TAG_SIZE)
 
-    (fixRate:init-dagState CORE_Shaper 3 TAG_SIZE)
+    (fixRate:init-dagState CORE_Shaper 2 TAG_SIZE)
     ;(fixRate:init-dagState CORE_Shaper (bitvector->natural pub))
     ;(uninter:init-dagState CORE_Shaper pubPro HIST_SIZE)
 
@@ -74,13 +74,13 @@
   
   (define state1 (concrete:init-state
     (uninter:init-dagState CORE_Shaper secPro1 HIST_SIZE HIST_SIZE TAG_SIZE)
-    (fixRate:init-dagState CORE_Shaper 3 TAG_SIZE)
+    (fixRate:init-dagState CORE_Shaper 2 TAG_SIZE)
     (uninter:init-dagState CORE_Rx recvPro HIST_SIZE MAXCLK TAG_SIZE)
     (fixRate:init-scheduler 1)
   ))
   (define state2 (concrete:init-state
     (uninter:init-dagState CORE_Shaper secPro2 HIST_SIZE HIST_SIZE TAG_SIZE)
-    (fixRate:init-dagState CORE_Shaper 3 TAG_SIZE)
+    (fixRate:init-dagState CORE_Shaper 2 TAG_SIZE)
     (uninter:init-dagState CORE_Rx recvPro HIST_SIZE MAXCLK TAG_SIZE)
     (fixRate:init-scheduler 1)
   ))
@@ -90,6 +90,8 @@
   ; TODO: should set into a compete symbolic state
   (define-symbolic respHistory_Tx1 respHistory_Tx2 respHistory_Rx (bitvector HIST_SIZE))
   (define-symbolic cycleForNext_Shaper1 cycleForNext_Shaper2 (bitvector 2))
+  (assume (not (bveq (bv 3 2) cycleForNext_Shaper1)))
+  (assume (not (bveq (bv 3 2) cycleForNext_Shaper2)))
   (define-symbolic vertexID_Tx1 vertexID_Tx2 vertexID_Shaper1 vertexID_Shaper2 vertexID_Rx (bitvector 4))
   (define-symbolic tagID_Shaper1 tagID_Shaper2 (bitvector TAG_SIZE))
   (define (set-state! state respHistory_Tx vertexID_Tx
