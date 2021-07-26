@@ -67,13 +67,13 @@
   
   (unless (void? resp_Shaper)
     (begin
-      (simuRespFor-dagState! dagState_Shaper (packet-vertexID resp_Shaper))
+      (simuRespFor-dagState! dagState_Shaper (packet-vertexID resp_Shaper) (packet-tag resp_Shaper))
       (let ([vertexID_Tx (extractTxFrom-vertexMap! vertexMap (packet-vertexID resp_Shaper))])
         (if (void? vertexID_Tx)
           (void)
-          (simuRespFor-dagState! dagState_Shaper vertexID_Tx)))))
+          (simuRespFor-dagState! dagState_Shaper vertexID_Tx (packet-tag resp_Shaper))))))
   (unless (void? resp_Rx)
-    (simuRespFor-dagState! dagState_Rx (packet-vertexID resp_Rx)))
+    (simuRespFor-dagState! dagState_Rx (packet-vertexID resp_Rx) (packet-tag resp_Rx)))
 
   (symopt-scheduler! scheduler)
   ; update clk

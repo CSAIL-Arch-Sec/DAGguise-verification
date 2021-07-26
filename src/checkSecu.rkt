@@ -6,22 +6,25 @@
 (define (checkSecu HIST_SIZE MAXCLK)
   (define bitWidth 2) (define-symbolic sec1 sec2 pub recv sched
                                        debug1 debug2 (bitvector bitWidth))
-  (define-symbolic secPro1 secPro2 pubPro recvPro schedPro
+  (define-symbolic schedPro
                    debug1Pro debug2Pro (~> (bitvector HIST_SIZE) boolean?))
+  (define TAG_SIZE 1)
+  (define-symbolic secPro1 secPro2 pubPro recvPro
+                   debug3Pro debug4Pro (~> (bitvector (* (+ 1 TAG_SIZE) HIST_SIZE)) (bitvector (+ 1 TAG_SIZE))))
 
 
   (define state1 (concrete:init-state
     ;(fixRate:init-dagState CORE_Shaper 100)
     ;(fixRate:init-dagState CORE_Shaper (bitvector->natural sec1))
-    (uninter:init-dagState CORE_Shaper secPro1 HIST_SIZE HIST_SIZE)
+    (uninter:init-dagState CORE_Shaper secPro1 HIST_SIZE HIST_SIZE TAG_SIZE)
 
-    (fixRate:init-dagState CORE_Shaper 3)
+    (fixRate:init-dagState CORE_Shaper 3 TAG_SIZE)
     ;(fixRate:init-dagState CORE_Shaper (bitvector->natural pub))
     ;(uninter:init-dagState CORE_Shaper pubPro HIST_SIZE)
 
     ;(fixRate:init-dagState CORE_Rx 100)
     ;(fixRate:init-dagState CORE_Rx (bitvector->natural recv))
-    (uninter:init-dagState CORE_Rx recvPro HIST_SIZE MAXCLK)
+    (uninter:init-dagState CORE_Rx recvPro HIST_SIZE MAXCLK TAG_SIZE)
 
     (fixRate:init-scheduler 1)
     ;(fixRateVec:init-scheduler 1)
@@ -36,15 +39,15 @@
   (define state2 (concrete:init-state
     ;(fixRate:init-dagState CORE_Shaper 100)
     ;(fixRate:init-dagState CORE_Shaper (bitvector->natural sec2))
-    (uninter:init-dagState CORE_Shaper secPro2 HIST_SIZE HIST_SIZE)
+    (uninter:init-dagState CORE_Shaper secPro2 HIST_SIZE HIST_SIZE TAG_SIZE)
 
-    (fixRate:init-dagState CORE_Shaper 3)
+    (fixRate:init-dagState CORE_Shaper 3 TAG_SIZE)
     ;(fixRate:init-dagState CORE_Shaper (bitvector->natural pub))
     ;(uninter:init-dagState CORE_Shaper pubPro HIST_SIZE)
 
     ;(fixRate:init-dagState CORE_Rx 100)
     ;(fixRate:init-dagState CORE_Rx (bitvector->natural recv))
-    (uninter:init-dagState CORE_Rx recvPro HIST_SIZE MAXCLK)
+    (uninter:init-dagState CORE_Rx recvPro HIST_SIZE MAXCLK TAG_SIZE)
 
     (fixRate:init-scheduler 1)
     ;(fixRateVec:init-scheduler 1)
@@ -66,18 +69,19 @@
 (define (checkSecuInduct HIST_SIZE MAXCLK)
 
   ; STEP1: init the state
-  (define-symbolic secPro1 secPro2 recvPro (~> (bitvector HIST_SIZE) boolean?))
+  (define TAG_SIZE 1)
+  (define-symbolic secPro1 secPro2 recvPro (~> (bitvector (* (+ 1 TAG_SIZE) HIST_SIZE)) (bitvector (+ 1 TAG_SIZE))))
   
   (define state1 (concrete:init-state
-    (uninter:init-dagState CORE_Shaper secPro1 HIST_SIZE HIST_SIZE)
-    (fixRate:init-dagState CORE_Shaper 3)
-    (uninter:init-dagState CORE_Rx recvPro HIST_SIZE MAXCLK)
+    (uninter:init-dagState CORE_Shaper secPro1 HIST_SIZE HIST_SIZE TAG_SIZE)
+    (fixRate:init-dagState CORE_Shaper 3 TAG_SIZE)
+    (uninter:init-dagState CORE_Rx recvPro HIST_SIZE MAXCLK TAG_SIZE)
     (fixRate:init-scheduler 1)
   ))
   (define state2 (concrete:init-state
-    (uninter:init-dagState CORE_Shaper secPro2 HIST_SIZE HIST_SIZE)
-    (fixRate:init-dagState CORE_Shaper 3)
-    (uninter:init-dagState CORE_Rx recvPro HIST_SIZE MAXCLK)
+    (uninter:init-dagState CORE_Shaper secPro2 HIST_SIZE HIST_SIZE TAG_SIZE)
+    (fixRate:init-dagState CORE_Shaper 3 TAG_SIZE)
+    (uninter:init-dagState CORE_Rx recvPro HIST_SIZE MAXCLK TAG_SIZE)
     (fixRate:init-scheduler 1)
   ))
 
@@ -87,19 +91,20 @@
   (define-symbolic respHistory_Tx1 respHistory_Tx2 respHistory_Rx (bitvector HIST_SIZE))
   (define-symbolic cycleForNext_Shaper1 cycleForNext_Shaper2 (bitvector 2))
   (define-symbolic vertexID_Tx1 vertexID_Tx2 vertexID_Shaper1 vertexID_Shaper2 vertexID_Rx (bitvector 4))
+  (define-symbolic tagID_Shaper1 tagID_Shaper2 (bitvector TAG_SIZE))
   (define (set-state! state respHistory_Tx vertexID_Tx
-                            cycleForNext_Shaper vertexID_Shaper
+                            cycleForNext_Shaper vertexID_Shaper tagID_Shaper
                             respHistory_Rx vertexID_Rx)
     (uninter:set-dagState! (state-dagState_Tx state) respHistory_Tx vertexID_Tx)
-    (fixRate:set-dagState! (state-dagState_Shaper state) cycleForNext_Shaper vertexID_Shaper)
+    (fixRate:set-dagState! (state-dagState_Shaper state) cycleForNext_Shaper vertexID_Shaper tagID_Shaper)
     (uninter:set-dagState! (state-dagState_Rx state) respHistory_Rx vertexID_Rx)
   )
 
   (set-state! state1 respHistory_Tx1 (bitvector->natural vertexID_Tx1)
-                     (bitvector->natural cycleForNext_Shaper1) (bitvector->natural vertexID_Shaper1)
+                     (bitvector->natural cycleForNext_Shaper1) (bitvector->natural vertexID_Shaper1) tagID_Shaper1
                      respHistory_Rx (bitvector->natural vertexID_Rx))
   (set-state! state2 respHistory_Tx2 (bitvector->natural vertexID_Tx2)
-                     (bitvector->natural cycleForNext_Shaper2) (bitvector->natural vertexID_Shaper2)
+                     (bitvector->natural cycleForNext_Shaper2) (bitvector->natural vertexID_Shaper2) tagID_Shaper2
                      respHistory_Rx (bitvector->natural vertexID_Rx))
   ;(println "init state1") (println state1)
   ;(println "init state2") (println state2)
@@ -125,15 +130,15 @@
   (simu state2 0)
 
   (define startTime (current-seconds))
-  (println (verify (assert (equal? (extract 1 1 (dagState-respHistory (state-dagState_Rx state1)))
-                                   (extract 1 1 (dagState-respHistory (state-dagState_Rx state2)))))))
+  (println (verify (assert (equal? (extract (- (* 2 (+ 1 TAG_SIZE)) 1) (- (* 2 (+ 1 TAG_SIZE)) 2) (dagState-respHistory (state-dagState_Rx state1)))
+                                   (extract (- (* 2 (+ 1 TAG_SIZE)) 1) (- (* 2 (+ 1 TAG_SIZE)) 2) (dagState-respHistory (state-dagState_Rx state2)))))))
   (print "Time for SMT solver: ") (print (/ (- (current-seconds) startTime) 60.0)) (println "min")
 )
 
 
 (define (testMe)
-  (define arg-hist 2)
-  (define arg-cycle 12)
+  (define arg-hist 3)
+  (define arg-cycle 7)
   (command-line
     #:once-each
     [("--hist")  v "The size of req/resp history for uninterpreted funciton"

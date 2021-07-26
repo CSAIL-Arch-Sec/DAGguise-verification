@@ -19,13 +19,16 @@
 ;vertexID - the ID of next sent request, unique for each req/resp pair
 ;coreID - const - all sent packet will be labeled with coreID, unique for each core/dag
 ;interval - const - send request every interval cycles
-(struct dagState (cycleForNext vertexID coreID interval) #:mutable #:transparent)
-(define (init-dagState coreID interval) (dagState interval 0 coreID interval))
+;tagID - the tag (bankID) of next sent request.
+;TAG_SIZE - log2 of #Bank
+(struct dagState (cycleForNext vertexID coreID tagID interval TAG_SIZE) #:mutable #:transparent)
+(define (init-dagState coreID interval TAG_SIZE) (dagState interval 0 coreID (bv 0 TAG_SIZE) interval TAG_SIZE))
 
 ; For K induction
-(define (set-dagState! dagState cycleForNext vertexID)
+(define (set-dagState! dagState cycleForNext vertexID tagID)
   (set-dagState-cycleForNext! dagState cycleForNext)
   (set-dagState-vertexID! dagState vertexID)
+  (set-dagState-tagID! dagState tagID)
 )
 
 
@@ -44,7 +47,7 @@
 )
 
 
-(define (simuRespFor-dagState! dagState vertexID)
+(define (simuRespFor-dagState! dagState vertexID tagID)
   (void))
 
 (define (incClkFor-dagState! dagState)
@@ -55,14 +58,15 @@
 (define (dagState-req dagState)
   (if (equal? 0 (dagState-cycleForNext dagState))
     (begin
+      (set-dagState-tagID! dagState (bvadd (bv 1 (dagState-TAG_SIZE dagState)) (dagState-tagID dagState)))
       (set-dagState-vertexID! dagState (+ 1 (dagState-vertexID dagState)))
-      (packet (dagState-coreID dagState) (dagState-vertexID dagState) 0 0))
+      (packet (dagState-coreID dagState) (dagState-vertexID dagState) 0 (dagState-tagID dagState)))
     (void)))
 
 
 (define (testMe)
-  (define dagState (init-dagState CORE_Shaper 3))
-  (simuRespFor-dagState! dagState 11111)
+  (define dagState (init-dagState CORE_Shaper 3 1))
+  (simuRespFor-dagState! dagState 11111 222)
 
   (println (dagState-req dagState))
   (incClkFor-dagState! dagState)
@@ -73,6 +77,13 @@
   (println (dagState-req dagState))
   (incClkFor-dagState! dagState)
   (println (dagState-req dagState))
-  (incClkFor-dagState! dagState))
+  (incClkFor-dagState! dagState)
+  (println (dagState-req dagState))
+  (incClkFor-dagState! dagState)
+  (println (dagState-req dagState))
+  (incClkFor-dagState! dagState)
+  (println (dagState-req dagState))
+  (incClkFor-dagState! dagState)
+)
 
 ;(testMe)

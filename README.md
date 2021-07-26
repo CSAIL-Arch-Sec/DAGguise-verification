@@ -5,6 +5,7 @@
 - add document with Scribble
 - implement multi-bank
 - implement k-induction
+- why with multi-bank, k-induction needs a smaller k
 
 ## Name Conventions
 
