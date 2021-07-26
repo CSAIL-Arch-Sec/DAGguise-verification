@@ -97,7 +97,7 @@
   ;(println state)
   ;(println "scheduler")
   ;(println scheduler)
-  (unless (equal? 0 MAXCLK) (simu state (- MAXCLK 1))))
+  (unless (equal? 1 MAXCLK) (simu state (- MAXCLK 1))))
 
 
 (define (testMe)

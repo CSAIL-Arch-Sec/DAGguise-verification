@@ -16,6 +16,7 @@
   incClkFor-scheduler!
   scheduler-canAccept
   scheduler-resp
+  scheduler-reqHistory
   
   (all-from-out "packet.rkt"))
 
@@ -54,6 +55,11 @@
     [(struct fixRate:scheduler _) (apply fixRate:scheduler-resp args)]
     [(struct fixRateVec:scheduler _) (apply fixRateVec:scheduler-resp args)]
     [(struct uninter:scheduler _) (apply uninter:scheduler-resp args)])
+)
+
+(define (scheduler-reqHistory . args)
+  (match (car args)
+    [(struct fixRate:scheduler _) (apply fixRate:scheduler-reqHistory args)])
 )
 
 

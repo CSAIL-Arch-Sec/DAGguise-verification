@@ -26,7 +26,7 @@
     ;(fixRate:init-dagState CORE_Rx (bitvector->natural recv))
     (uninter:init-dagState CORE_Rx recvPro HIST_SIZE MAXCLK TAG_SIZE)
 
-    (fixRate:init-scheduler 1)
+    (fixRate:init-scheduler 1 MAXCLK TAG_SIZE)
     ;(fixRateVec:init-scheduler 1)
     ;(fixRate:init-scheduler (bitvector->natural sched))
     ;(fixRateVec:init-scheduler (bitvector->natural sched))
@@ -49,7 +49,7 @@
     ;(fixRate:init-dagState CORE_Rx (bitvector->natural recv))
     (uninter:init-dagState CORE_Rx recvPro HIST_SIZE MAXCLK TAG_SIZE)
 
-    (fixRate:init-scheduler 1)
+    (fixRate:init-scheduler 1 MAXCLK TAG_SIZE)
     ;(fixRateVec:init-scheduler 1)
     ;(fixRate:init-scheduler (bitvector->natural sched))
     ;(fixRateVec:init-scheduler (bitvector->natural sched))
@@ -74,15 +74,15 @@
   
   (define state1 (concrete:init-state
     (uninter:init-dagState CORE_Shaper secPro1 HIST_SIZE HIST_SIZE TAG_SIZE)
-    (fixRate:init-dagState CORE_Shaper 2 TAG_SIZE)
+    (fixRate:init-dagState CORE_Shaper 3 TAG_SIZE)
     (uninter:init-dagState CORE_Rx recvPro HIST_SIZE MAXCLK TAG_SIZE)
-    (fixRate:init-scheduler 1)
+    (fixRate:init-scheduler 1 MAXCLK TAG_SIZE)
   ))
   (define state2 (concrete:init-state
     (uninter:init-dagState CORE_Shaper secPro2 HIST_SIZE HIST_SIZE TAG_SIZE)
-    (fixRate:init-dagState CORE_Shaper 2 TAG_SIZE)
+    (fixRate:init-dagState CORE_Shaper 3 TAG_SIZE)
     (uninter:init-dagState CORE_Rx recvPro HIST_SIZE MAXCLK TAG_SIZE)
-    (fixRate:init-scheduler 1)
+    (fixRate:init-scheduler 1 MAXCLK TAG_SIZE)
   ))
 
 
@@ -90,8 +90,6 @@
   ; TODO: should set into a compete symbolic state
   (define-symbolic respHistory_Tx1 respHistory_Tx2 respHistory_Rx (bitvector HIST_SIZE))
   (define-symbolic cycleForNext_Shaper1 cycleForNext_Shaper2 (bitvector 2))
-  (assume (not (bveq (bv 3 2) cycleForNext_Shaper1)))
-  (assume (not (bveq (bv 3 2) cycleForNext_Shaper2)))
   (define-symbolic vertexID_Tx1 vertexID_Tx2 vertexID_Shaper1 vertexID_Shaper2 vertexID_Rx (bitvector 4))
   (define-symbolic tagID_Shaper1 tagID_Shaper2 (bitvector TAG_SIZE))
   (define (set-state! state respHistory_Tx vertexID_Tx
@@ -117,30 +115,52 @@
   (println "---------------------------")
   (println "assume K cycles")
   (define (assumeK state1 state2 MAXCLK)
-    (simu state1 0)
-    (simu state2 0)
-    (unless (equal? 0 MAXCLK) (assumeK state1 state2 (- MAXCLK 1)))
+    (simu state1 1)
+    (simu state2 1)
+    (unless (equal? 2 MAXCLK) (assumeK state1 state2 (- MAXCLK 1)))
   )
   (assumeK state1 state2 MAXCLK)
   (assume (equal? (dagState-respHistory (state-dagState_Rx state1)) (dagState-respHistory (state-dagState_Rx state2))))
+  (assume (equal? (scheduler-reqHistory (state-scheduler state1)) (scheduler-reqHistory (state-scheduler state2))))
 
 
   ; STEP4: assert for 1 cycle
   (println "---------------------------")
   (println "assert 1 cycle")
-  (simu state1 0)
-  (simu state2 0)
+  (simu state1 1)
+  (simu state2 1)
 
   (define startTime (current-seconds))
-  (println (verify (assert (equal? (extract (- (* 2 (+ 1 TAG_SIZE)) 1) (- (* 2 (+ 1 TAG_SIZE)) 2) (dagState-respHistory (state-dagState_Rx state1)))
-                                   (extract (- (* 2 (+ 1 TAG_SIZE)) 1) (- (* 2 (+ 1 TAG_SIZE)) 2) (dagState-respHistory (state-dagState_Rx state2)))))))
+  (define sol
+    (verify (assert (&& (equal? (extract (- (* 2 (+ 1 TAG_SIZE)) 1) (+ 1 TAG_SIZE) (dagState-respHistory (state-dagState_Rx state1)))
+                                (extract (- (* 2 (+ 1 TAG_SIZE)) 1) (+ 1 TAG_SIZE) (dagState-respHistory (state-dagState_Rx state2))))
+                        (equal? (extract (- (* 4 (+ 1 TAG_SIZE)) 1) (* 2 (+ 1 TAG_SIZE)) (scheduler-reqHistory (state-scheduler state1)))
+                                (extract (- (* 4 (+ 1 TAG_SIZE)) 1) (* 2 (+ 1 TAG_SIZE)) (scheduler-reqHistory (state-scheduler state2)))))))
+  )
+  (println sol)
+  (when (sat? sol)
+    (println "scheduler-reqHistory")
+    (println (evaluate (scheduler-reqHistory (state-scheduler state1)) sol))
+    (println "vs")
+    (println (evaluate (scheduler-reqHistory (state-scheduler state2)) sol))
+    (println "dagState-respHistory")
+    (println (evaluate (dagState-respHistory (state-dagState_Rx state1)) sol))
+    (println "vs")
+    (println (evaluate (dagState-respHistory (state-dagState_Rx state2)) sol))
+
+    (println "state")
+    (println (evaluate state1 sol))
+    (println "vs")
+    (println (evaluate state2 sol))
+  )
+
   (print "Time for SMT solver: ") (print (/ (- (current-seconds) startTime) 60.0)) (println "min")
 )
 
 
 (define (testMe)
-  (define arg-hist 3)
-  (define arg-cycle 7)
+  (define arg-hist 10)
+  (define arg-cycle 5)
   (command-line
     #:once-each
     [("--hist")  v "The size of req/resp history for uninterpreted funciton"

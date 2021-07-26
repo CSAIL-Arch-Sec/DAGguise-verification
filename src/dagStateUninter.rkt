@@ -22,18 +22,19 @@
 ;HIST_SIZE - const - the length of respHistory, this is used to generate new requests
 ;OBSERVE_SIZE - const - the size of whole history, this is only for observation usage
 ;TAG_SIZE - log2 of #Bank
-(struct dagState (respHistory vertexID coreID reqFunc HIST_SIZE OBSERVE_SIZE TAG_SIZE) #:mutable #:transparent)
+(struct dagState (respHistory vertexID coreID reqFunc HIST_SIZE OBSERVE_SIZE TAG_SIZE REAL_SIZE) #:mutable #:transparent)
 (define (init-dagState coreID reqFunc HIST_SIZE OBSERVE_SIZE TAG_SIZE)
   (dagState
-    (bv 0 (* (+ 1 TAG_SIZE) OBSERVE_SIZE))
+    (bv 0 (* (+ 1 TAG_SIZE) (max HIST_SIZE OBSERVE_SIZE)))
     0 coreID reqFunc
     (* (+ 1 TAG_SIZE) HIST_SIZE)
     (* (+ 1 TAG_SIZE) OBSERVE_SIZE)
-    TAG_SIZE))
+    TAG_SIZE
+    (* (+ 1 TAG_SIZE) (max HIST_SIZE OBSERVE_SIZE))))
 
 ; For K induction
 (define (set-dagState! dagState respHistory vertexID)
-  (set-dagState-respHistory! dagState (zero-extend respHistory (bitvector (dagState-OBSERVE_SIZE dagState))))
+  (set-dagState-respHistory! dagState (zero-extend respHistory (bitvector (dagState-REAL_SIZE dagState))))
   (set-dagState-vertexID! dagState vertexID)
 )
 
@@ -56,13 +57,14 @@
 (define (simuRespFor-dagState! dagState vertexID tagID)
   (set-dagState-respHistory! dagState
     (bvor (dagState-respHistory dagState)
-      (bvadd (bvshl (bv 1 (dagState-OBSERVE_SIZE dagState)) (bv (dagState-TAG_SIZE dagState) (dagState-OBSERVE_SIZE dagState)))
-         (zero-extend tagID (bitvector (dagState-OBSERVE_SIZE dagState))))))
+      (bvadd (bvshl (bv 1 (dagState-REAL_SIZE dagState)) (bv (dagState-TAG_SIZE dagState) (dagState-REAL_SIZE dagState)))
+             (zero-extend tagID (bitvector (dagState-REAL_SIZE dagState))))))
 )
 
 (define (incClkFor-dagState! dagState)
   (set-dagState-respHistory! dagState
-    (bvshl (dagState-respHistory dagState) (bv (+ 1 (dagState-TAG_SIZE dagState)) (dagState-OBSERVE_SIZE dagState)))))
+    (bvshl (dagState-respHistory dagState) (bv (+ 1 (dagState-TAG_SIZE dagState)) (dagState-REAL_SIZE dagState))))
+)
 
 (define (dagState-req dagState)
   (define validTag ((dagState-reqFunc dagState) (extract (- (dagState-HIST_SIZE dagState) 1) 0 (dagState-respHistory dagState))))
