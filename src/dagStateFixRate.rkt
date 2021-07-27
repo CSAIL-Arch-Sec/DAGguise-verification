@@ -25,9 +25,8 @@
 (define (init-dagState coreID interval TAG_SIZE) (dagState interval 0 coreID (bv 0 TAG_SIZE) interval TAG_SIZE))
 
 ; For K induction
-(define (set-dagState! dagState cycleForNext vertexID tagID)
+(define (set-dagState! dagState cycleForNext tagID)
   (set-dagState-cycleForNext! dagState cycleForNext)
-  (set-dagState-vertexID! dagState vertexID)
   (set-dagState-tagID! dagState tagID)
 )
 
