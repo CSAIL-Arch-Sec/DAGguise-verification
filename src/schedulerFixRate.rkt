@@ -30,9 +30,11 @@
 (struct scheduler (buf cycleForNext reqHistory interval OBSERVE_SIZE TAG_SIZE) #:mutable #:transparent)
 (define (init-scheduler interval OBSERVE_SIZE TAG_SIZE)
   (scheduler
-    (list) interval
+    (make-vector (expt 2 TAG_SIZE) (list))
+    (make-vector (expt 2 TAG_SIZE) interval)
     (bv 0 (* 2 (+ 1 TAG_SIZE) OBSERVE_SIZE))
     interval (* 2 (+ 1 TAG_SIZE) OBSERVE_SIZE) TAG_SIZE)) ;TODO: this is a hack to get good response interval
+
 
 
 (define (symopt-scheduler! scheduler)
@@ -41,22 +43,6 @@
   (when DEBUG_SYMOPT (println "before symopt: symopt-scheduler!"))
   (when DEBUG_SYMOPT (println scheduler))
 
-  (when (union? (scheduler-buf scheduler))
-    (define (update-guardKey guardKey)
-      (append
-        (list (expr-simple (car guardKey) DEBUG_SYMOPT))
-        (map (lambda (x) (packet-simple x DEBUG_SYMOPT)) (rest guardKey))))
-    (define union-contents-old (union-contents (scheduler-buf scheduler)))
-    (define union-contents-new (map update-guardKey union-contents-old))
-    
-    (set-union-contents! (scheduler-buf scheduler) union-contents-new))
-
-  (when DEBUG_SYMOPT (println "--------------------------------------------------"))
-  (when DEBUG_SYMOPT (println "before symopt: symopt-scheduler!"))
-  (when DEBUG_SYMOPT (println scheduler))
-
-  (set-scheduler-cycleForNext! scheduler (expr-simple (scheduler-cycleForNext scheduler) DEBUG_SYMOPT))
-
   (when DEBUG_SYMOPT (println "after symopt: symopt-scheduler!"))
   (when DEBUG_SYMOPT (println scheduler))
   (when DEBUG_SYMOPT (println "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"))
@@ -64,8 +50,9 @@
 
 
 (define (simuReqFor-scheduler! scheduler packet)
-  (set-scheduler-buf! scheduler
-    (append (scheduler-buf scheduler) (list packet)))
+  (let ([tagID (bitvector->natural (packet-tag packet))]
+        [buf (scheduler-buf scheduler)])
+    (vector-set! buf tagID (append (vector-ref buf tagID) (list packet))))
 
   (when (equal? CORE_Shaper (packet-coreID packet))
     (set-scheduler-reqHistory! scheduler
@@ -83,11 +70,21 @@
 )
 
 (define (incClkFor-scheduler! scheduler)
-  (unless (equal? 0 (length (scheduler-buf scheduler)))
-    (if (equal? 0 (scheduler-cycleForNext scheduler))
-      (begin (set-scheduler-buf! scheduler (rest (scheduler-buf scheduler)))
-             (set-scheduler-cycleForNext! scheduler (scheduler-interval scheduler)))
-      (set-scheduler-cycleForNext! scheduler (- (scheduler-cycleForNext scheduler) 1))))
+ (define buf-isEmpty (vector-map (lambda (buf) (empty? buf))
+                                 (scheduler-buf scheduler)))
+ (define buf-willResp (vector-map (lambda (cycleForNext) (equal? 0 cycleForNext))
+                                  (scheduler-cycleForNext scheduler)))
+
+ (vector-map! (lambda (buf isEmpty willResp) (if (&& (not isEmpty) willResp)
+                                                 (rest buf)
+                                                 buf))
+              (scheduler-buf scheduler) buf-isEmpty buf-willResp)
+ (vector-map! (lambda (cycleForNext isEmpty willResp) (if (not isEmpty)
+                                                          (if willResp
+                                                              (scheduler-interval scheduler)
+                                                              (- cycleForNext 1))
+                                                          (scheduler-interval scheduler)))
+              (scheduler-cycleForNext scheduler) buf-isEmpty buf-willResp)
 
   (set-scheduler-reqHistory! scheduler
     (bvshl (scheduler-reqHistory scheduler) (bv (* 2 (+ 1 (scheduler-TAG_SIZE scheduler))) (scheduler-OBSERVE_SIZE scheduler))))
@@ -102,29 +99,37 @@
   ;  (list #f #f))
   )
 
+; NOTE: when bus contention, we always give smaller tagID high priority
 (define (scheduler-resp scheduler)
-  (if (&& (< 0 (length (scheduler-buf scheduler)))
-          (equal? 0 (scheduler-cycleForNext scheduler)))
-    (let ([packet (first (scheduler-buf scheduler))])
+  (define packet-canResp
+    (vector-filter-not void?
+      (vector-map (lambda (buf cycleForNext) (if (&& (not (empty? buf)) (equal? 0 cycleForNext))
+                                                 (first buf)
+                                                 (void)))
+                  (scheduler-buf scheduler) (scheduler-cycleForNext scheduler))))
+
+  (if (vector-empty? packet-canResp)
+    (list (void) (void))
+    (let ([packet (vector-ref packet-canResp 0)])
       (cond
         [(equal? CORE_Shaper (packet-coreID packet)) (list packet (void))]
         [(equal? CORE_Rx (packet-coreID packet)) (list (void) packet)]
-        [else (assert #f)]))
-    (list (void) (void))))
+        [else (assert #f)])))
+)
 
 
 (define (testMe)
-  (define scheduler (init-scheduler 3))
+  (define scheduler (init-scheduler 3 1 1))
 
   (println (scheduler-canAccept scheduler #t #f))
   (println "-------------------")
   
-  (simuReqFor-scheduler! scheduler (packet 0 0 0 0))
+  (simuReqFor-scheduler! scheduler (packet 0 0 0 (bv 0 1)))
   (incClkFor-scheduler! scheduler)
   (println scheduler)
   (println "-------------------")
-  (simuReqFor-scheduler! scheduler (packet 0 0 0 1))
-  (simuReqFor-scheduler! scheduler (packet 1 0 0 1))
+  (simuReqFor-scheduler! scheduler (packet 0 0 0 (bv 0 1)))
+  (simuReqFor-scheduler! scheduler (packet 1 0 0 (bv 1 1)))
   (incClkFor-scheduler! scheduler)
   (println scheduler)
   (println "-------------------")
