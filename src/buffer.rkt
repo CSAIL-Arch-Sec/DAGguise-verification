@@ -5,6 +5,7 @@
 
 (provide
   init-buffer
+  set-buffer!
 
   symopt-buffer!
   pushTo-buffer!
@@ -19,23 +20,19 @@
 (struct buffer (buf) #:mutable #:transparent)
 (define (init-buffer) (buffer (list)))
 
+(define (set-buffer! buffer buf-valid coreID buf-vertexID buf-tag)
+  (set-buffer-buf! buffer
+    (filter (lambda (x) (not (void? x)))
+      (map (lambda (valid vertexID tag) (if valid (packet coreID (bitvector->natural vertexID) 0 tag) (void)))
+           buf-valid buf-vertexID buf-tag)))
+)
+
 
 (define (symopt-buffer! buffer)
 
   (when DEBUG_SYMOPT (println "--------------------------------------------------"))
   (when DEBUG_SYMOPT (println "before symopt: symopt-buffer!"))
   (when DEBUG_SYMOPT (println buffer))
-
-  (define (symopt-union! union)
-    (when (union? union)
-      (define (guardKey-simple guardKey)
-        (cons
-          (expr-simple (car guardKey) DEBUG_SYMOPT)
-          (packet-simple (cdr guardKey) DEBUG_SYMOPT)))
-      (define union-contents-old (union-contents union))
-      (define union-contents-new (map guardKey-simple union-contents-old))
-      (set-union-contents! union union-contents-new)))
-  (for-each symopt-union! (buffer-buf buffer))
 
   (when DEBUG_SYMOPT (println "after symopt: symopt-buffer!"))
   (when DEBUG_SYMOPT (println buffer))
@@ -61,6 +58,16 @@
 (require "packet.rkt")
 (define (testMe)
   (define buffer (init-buffer))
+
+  (println buffer)
+  (define TAG_SIZE 1)
+  (define VERTEXID_SIZE 4)
+  (define BUF_SIZE_DAG 2)
+  (define (buf-valid)    (build-list BUF_SIZE_DAG (lambda (ingore) (define-symbolic* x boolean?)                  x)))
+  (define (buf-vertexID) (build-list BUF_SIZE_DAG (lambda (ingore) (define-symbolic* x (bitvector VERTEXID_SIZE)) x)))
+  (define (buf-tag)      (build-list BUF_SIZE_DAG (lambda (ingore) (define-symbolic* x (bitvector TAG_SIZE))      x)))
+  (set-buffer! buffer (buf-valid) CORE_Shaper (buf-vertexID) (buf-tag))
+  (println (union-contents (buffer-buf buffer)))
 
   (println buffer)
   (pushTo-buffer! buffer (packet 0 0 0 0))

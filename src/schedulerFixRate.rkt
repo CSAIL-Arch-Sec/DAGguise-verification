@@ -37,11 +37,18 @@
     interval (* 2 (+ 1 TAG_SIZE) OBSERVE_SIZE) TAG_SIZE)) ;TODO: this is a hack to get good response interval
 
 ; For K induction
-(define (set-scheduler! scheduler cycleForNext)
+(define (set-scheduler! scheduler cycleForNext buf-valid buf-coreID buf-vertexID buf-tag)
   (set-scheduler-cycleForNext! scheduler
     (list->vector
       (map (lambda (i) (bitvector->natural i))
            cycleForNext)))
+  (set-scheduler-buf! scheduler
+    (list->vector
+      (map (lambda (valid-multi coreID-multi vertexID-multi tag-multi)
+                   (filter (lambda (x) (not (void? x)))
+                      (map (lambda (valid coreID vertexID tag) (if valid (packet (bitvector->natural coreID) (bitvector->natural vertexID) 0 tag) (void)))
+                           valid-multi coreID-multi vertexID-multi tag-multi)))
+           buf-valid buf-coreID buf-vertexID buf-tag)))
 )
 
 

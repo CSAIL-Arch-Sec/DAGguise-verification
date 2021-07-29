@@ -40,7 +40,7 @@
   (print "Time for SMT solver: ") (print (/ (- (current-seconds) startTime) 60.0)) (println "min")
 )
 
-(define (checkSecu_induct MAXCLK TAG_SIZE INTERVAL_SIZE_SHAPER INTERVAL_SIZE_SCHEDULER)
+(define (checkSecu_induct MAXCLK TAG_SIZE INTERVAL_SIZE_SHAPER INTERVAL_SIZE_SCHEDULER VERTEXID_SIZE BUF_SIZE_DAG BUF_SIZE_SCHEDULER)
 
   ; STEP1: init the state
   ; concrete: shaper, scheduler
@@ -69,14 +69,39 @@
   (fixRate:set-dagState! (state-dagState_Shaper state1) (bitvector->natural cycleForNext_Shaper1) tagID_Shaper1)
   (fixRate:set-dagState! (state-dagState_Shaper state2) (bitvector->natural cycleForNext_Shaper2) tagID_Shaper2)
 
+  ; helper functions to get symbolic value
+  (define (symBoolList listLenth) (build-list listLenth (lambda (ingore) (define-symbolic* x boolean?) x)))
+  (define (symVecList bitWidth listLenth) (build-list listLenth (lambda (ingore) (define-symbolic* x (bitvector bitWidth)) x)))
+
   ; scheduler: Because the induction assumption says "scheduler has same history",
   ;            scheduler state can be set to the same for 2 secrets.
-  (define cycleForNext_scheduler (build-list (expt 2 TAG_SIZE) (lambda (ingore) (define-symbolic* x (bitvector INTERVAL_SIZE_SCHEDULER)) x)))
-  (fixRate:set-scheduler! (state-scheduler state1) cycleForNext_scheduler)
-  (fixRate:set-scheduler! (state-scheduler state2) cycleForNext_scheduler)
+  (define cycleForNext_scheduler (symVecList INTERVAL_SIZE_SCHEDULER (expt 2 TAG_SIZE)))
+  (define buf_scheduler-valid    (build-list (expt 2 TAG_SIZE) (lambda (ignore) (symBoolList BUF_SIZE_SCHEDULER))))
+  (define buf_scheduler-coreID (build-list (expt 2 TAG_SIZE) (lambda (ignore) (symVecList 1 BUF_SIZE_SCHEDULER))))
+  (define buf_scheduler-vertexID (build-list (expt 2 TAG_SIZE) (lambda (ignore) (symVecList VERTEXID_SIZE BUF_SIZE_SCHEDULER))))
+  (define buf_scheduler-tag      (build-list (expt 2 TAG_SIZE) (lambda (ignore) (symVecList TAG_SIZE BUF_SIZE_SCHEDULER))))
+  (fixRate:set-scheduler! (state-scheduler state1) cycleForNext_scheduler buf_scheduler-valid buf_scheduler-coreID buf_scheduler-vertexID buf_scheduler-tag)
+  (fixRate:set-scheduler! (state-scheduler state2) cycleForNext_scheduler buf_scheduler-valid buf_scheduler-coreID buf_scheduler-vertexID buf_scheduler-tag)
 
+  ; Tx: state can be different for 2 secrets
   ; Rx: Because the induction assumption says "receiver has same observation (history)",
   ;     Rx state can be set to the same.
+
+  ; Buffer_Tx/Shaper: state can be different for 2 secrets
+  (define (buf-valid)    (symBoolList BUF_SIZE_DAG))
+  (define (buf-vertexID) (symVecList VERTEXID_SIZE BUF_SIZE_DAG))
+  (define (buf-tag)      (symVecList TAG_SIZE BUF_SIZE_DAG))
+  (set-buffer! (state-buffer_Tx     state1) (buf-valid) CORE_Shaper (buf-vertexID) (buf-tag))
+  (set-buffer! (state-buffer_Shaper state1) (buf-valid) CORE_Shaper (buf-vertexID) (buf-tag))
+  (set-buffer! (state-buffer_Tx     state2) (buf-valid) CORE_Shaper (buf-vertexID) (buf-tag))
+  (set-buffer! (state-buffer_Shaper state2) (buf-valid) CORE_Shaper (buf-vertexID) (buf-tag))
+
+  ; Buffer_Rx: same for 2 secrets
+  (define buf_Rx-valid (buf-valid))
+  (define buf_Rx-vertexID (buf-vertexID))
+  (define buf_Rx-tag (buf-tag))
+  (set-buffer! (state-buffer_Rx state1) buf_Rx-valid CORE_Rx buf_Rx-vertexID buf_Rx-tag)
+  (set-buffer! (state-buffer_Rx state2) buf_Rx-valid CORE_Rx buf_Rx-vertexID buf_Rx-tag)
 
 
   ; STEP3: assume for K cycles
@@ -104,6 +129,22 @@
                         (equal? (scheduler-reqHistory (state-scheduler state1)) (scheduler-reqHistory (state-scheduler state2))))))
   )
   (println sol)
+
+  (when (sat? sol)
+    (println "scheduler-reqHistory")
+    (println (evaluate (scheduler-reqHistory (state-scheduler state1)) sol))
+    (println "vs")
+    (println (evaluate (scheduler-reqHistory (state-scheduler state2)) sol))
+    (println "dagState-respHistory")
+    (println (evaluate (dagState-respHistory (state-dagState_Rx state1)) sol))
+    (println "vs")
+    (println (evaluate (dagState-respHistory (state-dagState_Rx state2)) sol))
+
+    (println "state")
+    (println (evaluate state1 sol))
+    (println "vs")
+    (println (evaluate state2 sol))
+  )
   (print "Time for SMT solver: ") (print (/ (- (current-seconds) startTime) 60.0)) (println "min")
 )
 
@@ -112,11 +153,17 @@
 ;   - TAG_SIZE
 ;   - INTERVAL_SIZE_SHAPER
 ;   - INTERVAL_SIZE_SCHEDULER
+;   - VERTEXID_SIZE
+;   - BUF_SIZE_DAG
+;   - BUF_SIZE_SCHEDULER
 ; - k-induction's k
 ;   - arg-cycle
 (define (testMe)
-  (define arg-cycle 4)
+
   (define TAG_SIZE 1) (define INTERVAL_SIZE_SHAPER 2) (define INTERVAL_SIZE_SCHEDULER 1)
+  (define VERTEXID_SIZE 4) (define BUF_SIZE_DAG 2) (define BUF_SIZE_SCHEDULER 2)
+
+  (define arg-cycle 6)
   (command-line
     #:once-each
     [("--cycle") v "Number of cycles to simulate"
@@ -125,7 +172,7 @@
   (print "Run with args: --cycle:") (print arg-cycle)
   
   (checkSecu_init arg-cycle TAG_SIZE INTERVAL_SIZE_SHAPER INTERVAL_SIZE_SCHEDULER)
-  (checkSecu_induct arg-cycle TAG_SIZE INTERVAL_SIZE_SHAPER INTERVAL_SIZE_SCHEDULER)
+  (checkSecu_induct arg-cycle TAG_SIZE INTERVAL_SIZE_SHAPER INTERVAL_SIZE_SCHEDULER VERTEXID_SIZE BUF_SIZE_DAG BUF_SIZE_SCHEDULER)
 )
 
 (testMe)
