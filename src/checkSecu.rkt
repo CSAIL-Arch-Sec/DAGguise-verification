@@ -2,25 +2,24 @@
 
 (require "simu.rkt")
 
-(define (checkSecu_init MAXCLK)
+(define (checkSecu_init MAXCLK TAG_SIZE INTERVAL_SIZE_SHAPER INTERVAL_SIZE_SCHEDULER)
 
   ; STEP1: init the state
   ; concrete: shaper, scheduler
   ; symbolic: whether Tx/Rx send req at each cycle, and the tag
-  (define TAG_SIZE 1)
   (define-symbolic sec1 sec2 recv (bitvector (* (+ 1 TAG_SIZE) MAXCLK)))
   
   (define state1 (concrete:init-state
     (sym:init-dagState sec1 CORE_Shaper 0 TAG_SIZE)
-    (fixRate:init-dagState CORE_Shaper 3 TAG_SIZE)
+    (fixRate:init-dagState CORE_Shaper (- (expt 2 INTERVAL_SIZE_SHAPER) 1) TAG_SIZE)
     (sym:init-dagState recv CORE_Rx (+ 1 MAXCLK) TAG_SIZE)
-    (fixRate:init-scheduler 1 (+ 1 MAXCLK) TAG_SIZE)
+    (fixRate:init-scheduler (- (expt 2 INTERVAL_SIZE_SCHEDULER) 1) (+ 1 MAXCLK) TAG_SIZE)
   ))
   (define state2 (concrete:init-state
     (sym:init-dagState sec2 CORE_Shaper 0 TAG_SIZE)
-    (fixRate:init-dagState CORE_Shaper 3 TAG_SIZE)
+    (fixRate:init-dagState CORE_Shaper (- (expt 2 INTERVAL_SIZE_SHAPER) 1) TAG_SIZE)
     (sym:init-dagState recv CORE_Rx (+ 1 MAXCLK) TAG_SIZE)
-    (fixRate:init-scheduler 1 (+ 1 MAXCLK) TAG_SIZE)
+    (fixRate:init-scheduler (- (expt 2 INTERVAL_SIZE_SCHEDULER) 1) (+ 1 MAXCLK) TAG_SIZE)
   ))
 
 
@@ -41,25 +40,24 @@
   (print "Time for SMT solver: ") (print (/ (- (current-seconds) startTime) 60.0)) (println "min")
 )
 
-(define (checkSecu_induct MAXCLK)
+(define (checkSecu_induct MAXCLK TAG_SIZE INTERVAL_SIZE_SHAPER INTERVAL_SIZE_SCHEDULER)
 
   ; STEP1: init the state
   ; concrete: shaper, scheduler
   ; symbolic: whether Tx/Rx send req at each cycle, and the tag
-  (define TAG_SIZE 1)
   (define-symbolic sec1 sec2 recv (bitvector (* (+ 1 TAG_SIZE) (+ 1 MAXCLK))))
   
   (define state1 (concrete:init-state
     (sym:init-dagState sec1 CORE_Shaper 0 TAG_SIZE)
-    (fixRate:init-dagState CORE_Shaper 3 TAG_SIZE)
+    (fixRate:init-dagState CORE_Shaper (- (expt 2 INTERVAL_SIZE_SHAPER) 1) TAG_SIZE)
     (sym:init-dagState recv CORE_Rx 2 TAG_SIZE)
-    (fixRate:init-scheduler 1 2 TAG_SIZE)
+    (fixRate:init-scheduler (- (expt 2 INTERVAL_SIZE_SCHEDULER) 1) 2 TAG_SIZE)
   ))
   (define state2 (concrete:init-state
     (sym:init-dagState sec2 CORE_Shaper 0 TAG_SIZE)
-    (fixRate:init-dagState CORE_Shaper 3 TAG_SIZE)
+    (fixRate:init-dagState CORE_Shaper (- (expt 2 INTERVAL_SIZE_SHAPER) 1) TAG_SIZE)
     (sym:init-dagState recv CORE_Rx 2 TAG_SIZE)
-    (fixRate:init-scheduler 1 2 TAG_SIZE)
+    (fixRate:init-scheduler (- (expt 2 INTERVAL_SIZE_SCHEDULER) 1) 2 TAG_SIZE)
   ))
 
 
@@ -102,9 +100,15 @@
 )
 
 
-
+; - concrete implementations:
+;   - TAG_SIZE
+;   - INTERVAL_SIZE_SHAPER
+;   - INTERVAL_SIZE_SCHEDULER
+; - k-induction's k
+;   - arg-cycle
 (define (testMe)
   (define arg-cycle 4)
+  (define TAG_SIZE 1) (define INTERVAL_SIZE_SHAPER 2) (define INTERVAL_SIZE_SCHEDULER 1)
   (command-line
     #:once-each
     [("--cycle") v "Number of cycles to simulate"
@@ -112,8 +116,8 @@
   )
   (print "Run with args: --cycle:") (print arg-cycle)
   
-  (checkSecu_init arg-cycle)
-  (checkSecu_induct arg-cycle)
+  (checkSecu_init arg-cycle TAG_SIZE INTERVAL_SIZE_SHAPER INTERVAL_SIZE_SCHEDULER)
+  (checkSecu_induct arg-cycle TAG_SIZE INTERVAL_SIZE_SHAPER INTERVAL_SIZE_SCHEDULER)
 )
 
 (testMe)
