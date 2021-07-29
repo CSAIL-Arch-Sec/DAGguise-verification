@@ -8,6 +8,7 @@
 
 (provide
   fixRate:init-scheduler
+  fixRate:set-scheduler!
   fixRateVec:init-scheduler
   uninter:init-scheduler
 

@@ -7,6 +7,7 @@
 (provide
   (struct-out scheduler)
   init-scheduler
+  set-scheduler!
 
   symopt-scheduler!
   simuReqFor-scheduler!
@@ -35,6 +36,13 @@
     (bv 0 (* 2 (+ 1 TAG_SIZE) OBSERVE_SIZE))
     interval (* 2 (+ 1 TAG_SIZE) OBSERVE_SIZE) TAG_SIZE)) ;TODO: this is a hack to get good response interval
 
+; For K induction
+(define (set-scheduler! scheduler cycleForNext)
+  (set-scheduler-cycleForNext! scheduler
+    (list->vector
+      (map (lambda (i) (bitvector->natural i))
+           cycleForNext)))
+)
 
 
 (define (symopt-scheduler! scheduler)

@@ -64,11 +64,19 @@
   ; STEP2: set the state with symbolic value
   ; symbolic: shaper's state
   ; TODO: should set into a compete symbolic state
-  (define-symbolic cycleForNext_Shaper1 cycleForNext_Shaper2 (bitvector 2))
+  (define-symbolic cycleForNext_Shaper1 cycleForNext_Shaper2 (bitvector INTERVAL_SIZE_SHAPER))
   (define-symbolic tagID_Shaper1 tagID_Shaper2 (bitvector TAG_SIZE))
-
   (fixRate:set-dagState! (state-dagState_Shaper state1) (bitvector->natural cycleForNext_Shaper1) tagID_Shaper1)
   (fixRate:set-dagState! (state-dagState_Shaper state2) (bitvector->natural cycleForNext_Shaper2) tagID_Shaper2)
+
+  ; scheduler: Because the induction assumption says "scheduler has same history",
+  ;            scheduler state can be set to the same for 2 secrets.
+  (define cycleForNext_scheduler (build-list (expt 2 TAG_SIZE) (lambda (ingore) (define-symbolic* x (bitvector INTERVAL_SIZE_SCHEDULER)) x)))
+  (fixRate:set-scheduler! (state-scheduler state1) cycleForNext_scheduler)
+  (fixRate:set-scheduler! (state-scheduler state2) cycleForNext_scheduler)
+
+  ; Rx: Because the induction assumption says "receiver has same observation (history)",
+  ;     Rx state can be set to the same.
 
 
   ; STEP3: assume for K cycles
