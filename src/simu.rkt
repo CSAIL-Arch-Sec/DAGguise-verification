@@ -29,11 +29,11 @@
   (define scheduler (state-scheduler state))
 
   ; in transmitter
-  (let ([packet (packet-simple (dagState-req dagState_Tx) DEBUG_SYMOPT)])
+  (let ([packet (dagState-req dagState_Tx)])
     (unless (void? packet) (pushTo-buffer! buffer_Tx packet)))
 
   ; transmitter to shaper
-  (let [(packet (packet-simple (dagState-req dagState_Shaper) DEBUG_SYMOPT))]
+  (let [(packet (dagState-req dagState_Shaper))]
     (unless (void? packet)
       (begin
         (when (and (not (void? (buffer-head buffer_Tx)))
@@ -44,7 +44,7 @@
         (pushTo-buffer! buffer_Shaper packet))))
 
   ; in receiver
-  (let ([packet (packet-simple (dagState-req dagState_Rx) DEBUG_SYMOPT)])
+  (let ([packet (dagState-req dagState_Rx)])
     (unless (void? packet) (pushTo-buffer! buffer_Rx packet)))
 
   ; shaper/receiver to scheduler
@@ -75,22 +75,13 @@
   (unless (void? resp_Rx)
     (simuRespFor-dagState! dagState_Rx (packet-vertexID resp_Rx) (packet-tag resp_Rx)))
 
-  (symopt-scheduler! scheduler)
+  ;(simuRespFor-dagState! dagState_Shaper 0 0)
   ; update clk
   (set-state-clk! state (+ 1 clk))
   (incClkFor-dagState! dagState_Tx)
   (incClkFor-dagState! dagState_Shaper)
   (incClkFor-dagState! dagState_Rx)
   (incClkFor-scheduler! scheduler)
-
-  ; symbolic optimization
-  (symopt-dagState! dagState_Tx)
-  (symopt-dagState! dagState_Shaper)
-  (symopt-dagState! dagState_Rx)
-  (symopt-buffer! buffer_Tx)
-  (symopt-buffer! buffer_Shaper)
-  (symopt-buffer! buffer_Rx)
-  (symopt-scheduler! scheduler)
 
   ; recursive next cycle
   (print "Time for state-") (print (state-clk state)) (print ": ") (print (/ (- (current-seconds) startTime) 60.0)) (println "min")
