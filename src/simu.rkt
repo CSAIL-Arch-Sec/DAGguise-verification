@@ -71,7 +71,7 @@
       (let ([vertexID_Tx (extractTxFrom-vertexMap! vertexMap (packet-vertexID resp_Shaper))])
         (if (void? vertexID_Tx)
           (void)
-          (simuRespFor-dagState! dagState_Shaper vertexID_Tx (packet-tag resp_Shaper))))))
+          (simuRespFor-dagState! dagState_Tx vertexID_Tx (packet-tag resp_Shaper))))))
   (unless (void? resp_Rx)
     (simuRespFor-dagState! dagState_Rx (packet-vertexID resp_Rx) (packet-tag resp_Rx)))
 
