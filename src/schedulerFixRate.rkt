@@ -87,21 +87,31 @@
 )
 
 (define (incClkFor-scheduler! scheduler)
- (define buf-isEmpty (vector-map (lambda (buf) (empty? buf))
-                                 (scheduler-buf scheduler)))
- (define buf-willResp (vector-map (lambda (cycleForNext) (equal? 0 cycleForNext))
+  (define buf-isEmpty (vector-map (lambda (buf) (empty? buf))
+                                  (scheduler-buf scheduler)))
+  (define buf-willResp (vector-map (lambda (cycleForNext) (>= 0 cycleForNext))
                                   (scheduler-cycleForNext scheduler)))
 
- (vector-map! (lambda (buf isEmpty willResp) (if (&& (not isEmpty) willResp)
-                                                 (rest buf)
-                                                 buf))
-              (scheduler-buf scheduler) buf-isEmpty buf-willResp)
- (vector-map! (lambda (cycleForNext isEmpty willResp) (if (not isEmpty)
+  (define (setFirstTrue_recur v i waitFirstTrueFlag)
+    (when (< i (vector-length v))
+      (if waitFirstTrueFlag
+        (if (vector-ref v i)
+          (setFirstTrue_recur v (+ 1 i) #f)
+          (setFirstTrue_recur v (+ 1 i) #t))
+        (begin (vector-set! v i #f)
+               (setFirstTrue_recur v (+ 1 i) #f)))))
+  (setFirstTrue_recur buf-willResp 0 #t)
+
+  (vector-map! (lambda (buf isEmpty willResp) (if (&& (not isEmpty) willResp)
+                                                (rest buf)
+                                                buf))
+               (scheduler-buf scheduler) buf-isEmpty buf-willResp)
+  (vector-map! (lambda (cycleForNext isEmpty willResp) (if (not isEmpty)
                                                           (if willResp
                                                               (scheduler-interval scheduler)
                                                               (- cycleForNext 1))
                                                           (scheduler-interval scheduler)))
-              (scheduler-cycleForNext scheduler) buf-isEmpty buf-willResp)
+               (scheduler-cycleForNext scheduler) buf-isEmpty buf-willResp)
 
   (set-scheduler-reqHistory! scheduler
     (bvshl (scheduler-reqHistory scheduler) (bv (* 2 (+ 1 (scheduler-TAG_SIZE scheduler))) (scheduler-OBSERVE_SIZE scheduler))))
@@ -120,7 +130,7 @@
 (define (scheduler-resp scheduler)
   (define packet-canResp
     (vector-filter-not void?
-      (vector-map (lambda (buf cycleForNext) (if (&& (not (empty? buf)) (equal? 0 cycleForNext))
+      (vector-map (lambda (buf cycleForNext) (if (&& (not (empty? buf)) (>= 0 cycleForNext))
                                                  (first buf)
                                                  (void)))
                   (scheduler-buf scheduler) (scheduler-cycleForNext scheduler))))
@@ -136,17 +146,25 @@
 
 
 (define (testMe)
-  (define scheduler (init-scheduler 3 1 1))
+  (define scheduler (init-scheduler 2 1 1))
+  (set-scheduler! scheduler
+    (list (bv 1 1) (bv 1 1))
+    (list (list #t #f) (list #f #t))
+    (list (list (bv 0 1) (bv 0 1)) (list (bv 0 1) (bv 0 1)))
+    (list (list (bv 0 1) (bv 0 1)) (list (bv 0 1) (bv 0 1))))
 
-  (println (scheduler-canAccept scheduler #t #f))
+  ;(println (scheduler-canAccept scheduler #t #f))
+  (println scheduler)
   (println "-------------------")
   
-  (simuReqFor-scheduler! scheduler (packet 0 0 0 (bv 0 1)))
+  ;(simuReqFor-scheduler! scheduler (packet 0 0 0 (bv 0 1)))
+  (println (scheduler-resp scheduler))
   (incClkFor-scheduler! scheduler)
   (println scheduler)
   (println "-------------------")
-  (simuReqFor-scheduler! scheduler (packet 0 0 0 (bv 0 1)))
-  (simuReqFor-scheduler! scheduler (packet 1 0 0 (bv 1 1)))
+  ;(simuReqFor-scheduler! scheduler (packet 0 0 0 (bv 0 1)))
+  ;(simuReqFor-scheduler! scheduler (packet 1 0 0 (bv 1 1)))
+  (println (scheduler-resp scheduler))
   (incClkFor-scheduler! scheduler)
   (println scheduler)
   (println "-------------------")
