@@ -42,13 +42,15 @@
     (list->vector
       (map (lambda (i) (bitvector->natural i))
            cycleForNext)))
+
+  ; NOTE: because tag become useless after being pushed into bank buffer, set all tag to 0
   (set-scheduler-buf! scheduler
     (list->vector
-      (map (lambda (valid-multi coreID-multi vertexID-multi tag-multi)
+      (map (lambda (valid-multi coreID-multi vertexID-multi)
                    (filter (lambda (x) (not (void? x)))
-                      (map (lambda (valid coreID vertexID tag) (if valid (packet (bitvector->natural coreID) (bitvector->natural vertexID) 0 tag) (void)))
-                           valid-multi coreID-multi vertexID-multi tag-multi)))
-           buf-valid buf-coreID buf-vertexID buf-tag)))
+                      (map (lambda (valid coreID vertexID) (if valid (packet (bitvector->natural coreID) (bitvector->natural vertexID) 0 0) (void)))
+                           valid-multi coreID-multi vertexID-multi)))
+           buf-valid buf-coreID buf-vertexID)))
 )
 
 

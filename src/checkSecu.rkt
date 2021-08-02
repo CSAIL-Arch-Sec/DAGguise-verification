@@ -79,9 +79,8 @@
   (define buf_scheduler-valid    (build-list (expt 2 TAG_SIZE) (lambda (ignore) (symBoolList BUF_SIZE_SCHEDULER))))
   (define buf_scheduler-coreID (build-list (expt 2 TAG_SIZE) (lambda (ignore) (symVecList 1 BUF_SIZE_SCHEDULER))))
   (define buf_scheduler-vertexID (build-list (expt 2 TAG_SIZE) (lambda (ignore) (symVecList VERTEXID_SIZE BUF_SIZE_SCHEDULER))))
-  (define buf_scheduler-tag      (build-list (expt 2 TAG_SIZE) (lambda (ignore) (symVecList TAG_SIZE BUF_SIZE_SCHEDULER))))
-  (fixRate:set-scheduler! (state-scheduler state1) cycleForNext_scheduler buf_scheduler-valid buf_scheduler-coreID buf_scheduler-vertexID buf_scheduler-tag)
-  (fixRate:set-scheduler! (state-scheduler state2) cycleForNext_scheduler buf_scheduler-valid buf_scheduler-coreID buf_scheduler-vertexID buf_scheduler-tag)
+  (fixRate:set-scheduler! (state-scheduler state1) cycleForNext_scheduler buf_scheduler-valid buf_scheduler-coreID buf_scheduler-vertexID)
+  (fixRate:set-scheduler! (state-scheduler state2) cycleForNext_scheduler buf_scheduler-valid buf_scheduler-coreID buf_scheduler-vertexID)
 
   ; Tx: state can be different for 2 secrets
   ; Rx: Because the induction assumption says "receiver has same observation (history)",
