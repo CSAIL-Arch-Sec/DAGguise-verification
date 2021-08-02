@@ -131,7 +131,7 @@
 ; NOTE: when bus contention, we always give smaller tagID high priority
 (define (scheduler-resp scheduler)
   (define packet-canResp
-    (vector-filter-not void?
+    (vector-filter (lambda (x) (not (void? x)))
       (vector-map (lambda (buf cycleForNext) (if (&& (not (empty? buf)) (>= 0 cycleForNext))
                                                  (first buf)
                                                  (void)))
