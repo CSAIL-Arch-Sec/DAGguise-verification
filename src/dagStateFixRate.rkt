@@ -21,12 +21,13 @@
 ;interval - const - send request every interval cycles
 ;tagID - the tag (bankID) of next sent request.
 ;TAG_SIZE - log2 of #Bank
-(struct dagState (cycleForNext vertexID coreID tagID interval TAG_SIZE) #:mutable #:transparent)
-(define (init-dagState coreID interval TAG_SIZE) (dagState interval 0 coreID (bv 0 TAG_SIZE) interval TAG_SIZE))
+(struct dagState (pending cycleForNext vertexID coreID tagID interval TAG_SIZE) #:mutable #:transparent)
+(define (init-dagState coreID interval TAG_SIZE) (dagState #f interval 0 coreID (bv 0 TAG_SIZE) interval TAG_SIZE))
 
 ; For K induction
-(define (set-dagState! dagState cycleForNext tagID)
-  (set-dagState-cycleForNext! dagState cycleForNext)
+(define (set-dagState! dagState pending cycleForNext tagID)
+  (set-dagState-pending! dagState pending)
+  (set-dagState-cycleForNext! dagState (if pending (dagState-interval dagState) cycleForNext))
   (set-dagState-tagID! dagState tagID)
 )
 
@@ -37,9 +38,6 @@
   (when DEBUG_SYMOPT (println "before symopt: symopt-dagState!"))
   (when DEBUG_SYMOPT (println dagState))
 
-  (set-dagState-cycleForNext! dagState (expr-simple (dagState-cycleForNext dagState) DEBUG_SYMOPT))
-  (set-dagState-vertexID! dagState (expr-simple (dagState-vertexID dagState) DEBUG_SYMOPT))
-
   (when DEBUG_SYMOPT (println "after symopt: symopt-dagState!"))
   (when DEBUG_SYMOPT (println dagState))
   (when DEBUG_SYMOPT (println "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"))
@@ -47,15 +45,20 @@
 
 
 (define (simuRespFor-dagState! dagState vertexID tagID)
+  (set-dagState-pending! dagState #f)
   (void))
 
 (define (incClkFor-dagState! dagState)
-  (if (equal? 0 (dagState-cycleForNext dagState))
-    (set-dagState-cycleForNext! dagState (dagState-interval dagState))
-    (set-dagState-cycleForNext! dagState (- (dagState-cycleForNext dagState) 1))))
+  (unless (dagState-pending dagState)
+    (if (equal? 0 (dagState-cycleForNext dagState))
+      (begin
+        (set-dagState-pending! dagState #t)
+        (set-dagState-cycleForNext! dagState (dagState-interval dagState)))
+      (set-dagState-cycleForNext! dagState (- (dagState-cycleForNext dagState) 1))))
+)
 
 (define (dagState-req dagState)
-  (if (equal? 0 (dagState-cycleForNext dagState))
+  (if (&& (not (dagState-pending dagState)) (equal? 0 (dagState-cycleForNext dagState)))
     (begin
       (set-dagState-tagID! dagState (bvadd (bv 1 (dagState-TAG_SIZE dagState)) (dagState-tagID dagState)))
       (set-dagState-vertexID! dagState (+ 1 (dagState-vertexID dagState)))

@@ -40,7 +40,8 @@
 (define (set-scheduler! scheduler cycleForNext buf-valid buf-coreID buf-vertexID)
   (set-scheduler-cycleForNext! scheduler
     (list->vector
-      (map (lambda (i) (bitvector->natural i))
+      ;(map (lambda (i) (bitvector->natural i))
+      (map (lambda (i) 0)
            cycleForNext)))
 
   ; NOTE: because tag become useless after being pushed into bank buffer, set all tag to 0
@@ -48,7 +49,8 @@
     (list->vector
       (map (lambda (valid-multi coreID-multi vertexID-multi)
                    (filter (lambda (x) (not (void? x)))
-                      (map (lambda (valid coreID vertexID) (if valid (packet (bitvector->natural coreID) (bitvector->natural vertexID) 0 0) (void)))
+                      ;(map (lambda (valid coreID vertexID) (if valid (packet (bitvector->natural coreID) (bitvector->natural vertexID) 0 0) (void)))
+                      (map (lambda (valid coreID vertexID) (if #t (packet (bitvector->natural coreID) (bitvector->natural vertexID) 0 0) (void)))
                            valid-multi coreID-multi vertexID-multi)))
            buf-valid buf-coreID buf-vertexID)))
 )

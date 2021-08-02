@@ -62,12 +62,12 @@
 
 
   ; STEP2: set the state with symbolic value
-  ; symbolic: shaper's state
-  ; TODO: should set into a compete symbolic state
+  ; shaper's state
+  (define-symbolic pending_Shaper1 pending_Shaper2 boolean?)
   (define-symbolic cycleForNext_Shaper1 cycleForNext_Shaper2 (bitvector INTERVAL_SIZE_SHAPER))
   (define-symbolic tagID_Shaper1 tagID_Shaper2 (bitvector TAG_SIZE))
-  (fixRate:set-dagState! (state-dagState_Shaper state1) (bitvector->natural cycleForNext_Shaper1) tagID_Shaper1)
-  (fixRate:set-dagState! (state-dagState_Shaper state2) (bitvector->natural cycleForNext_Shaper2) tagID_Shaper2)
+  (fixRate:set-dagState! (state-dagState_Shaper state1) pending_Shaper1 (bitvector->natural cycleForNext_Shaper1) tagID_Shaper1)
+  (fixRate:set-dagState! (state-dagState_Shaper state2) pending_Shaper2 (bitvector->natural cycleForNext_Shaper2) tagID_Shaper2)
 
   ; helper functions to get symbolic value
   (define (symBoolList listLenth) (build-list listLenth (lambda (ingore) (define-symbolic* x boolean?) x)))
@@ -162,7 +162,7 @@
   (define TAG_SIZE 1) (define INTERVAL_SIZE_SHAPER 2) (define INTERVAL_SIZE_SCHEDULER 1)
   (define VERTEXID_SIZE 4) (define BUF_SIZE_DAG 2) (define BUF_SIZE_SCHEDULER 2)
 
-  (define arg-cycle 6)
+  (define arg-cycle 5)
   (command-line
     #:once-each
     [("--cycle") v "Number of cycles to simulate"
