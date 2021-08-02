@@ -94,15 +94,15 @@
   (define buf-willResp (vector-map (lambda (cycleForNext) (>= 0 cycleForNext))
                                   (scheduler-cycleForNext scheduler)))
 
-  (define (setFirstTrue_recur v i waitFirstTrueFlag)
+  (define (setFirstTrue_recur v v-ref i waitFirstTrueFlag)
     (when (< i (vector-length v))
       (if waitFirstTrueFlag
-        (if (vector-ref v i)
-          (setFirstTrue_recur v (+ 1 i) #f)
-          (setFirstTrue_recur v (+ 1 i) #t))
+        (if (&& (vector-ref v i) (not (vector-ref v-ref i)))
+          (setFirstTrue_recur v v-ref (+ 1 i) #f)
+          (setFirstTrue_recur v v-ref (+ 1 i) #t))
         (begin (vector-set! v i #f)
-               (setFirstTrue_recur v (+ 1 i) #f)))))
-  (setFirstTrue_recur buf-willResp 0 #t)
+               (setFirstTrue_recur v v-ref (+ 1 i) #f)))))
+  (setFirstTrue_recur buf-willResp buf-isEmpty 0 #t)
 
   (vector-map! (lambda (buf isEmpty willResp) (if (&& (not isEmpty) willResp)
                                                 (rest buf)
