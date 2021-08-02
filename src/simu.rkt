@@ -75,7 +75,6 @@
   (unless (void? resp_Rx)
     (simuRespFor-dagState! dagState_Rx (packet-vertexID resp_Rx) (packet-tag resp_Rx)))
 
-  ;(simuRespFor-dagState! dagState_Shaper 0 0)
   ; update clk
   (set-state-clk! state (+ 1 clk))
   (incClkFor-dagState! dagState_Tx)

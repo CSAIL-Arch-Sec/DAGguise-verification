@@ -138,6 +138,10 @@
     (println (evaluate (dagState-respHistory (state-dagState_Rx state1)) sol))
     (println "vs")
     (println (evaluate (dagState-respHistory (state-dagState_Rx state2)) sol))
+    (println "scheduler-resp")
+    (println (evaluate (scheduler-resp (state-scheduler state1)) sol))
+    (println "vs")
+    (println (evaluate (scheduler-resp (state-scheduler state2)) sol))
 
     (println "state")
     (println (evaluate state1 sol))
@@ -160,9 +164,9 @@
 (define (testMe)
 
   (define TAG_SIZE 1) (define INTERVAL_SIZE_SHAPER 2) (define INTERVAL_SIZE_SCHEDULER 1)
-  (define VERTEXID_SIZE 4) (define BUF_SIZE_DAG 2) (define BUF_SIZE_SCHEDULER 2)
+  (define VERTEXID_SIZE 4) (define BUF_SIZE_DAG 1) (define BUF_SIZE_SCHEDULER 1)
 
-  (define arg-cycle 5)
+  (define arg-cycle 6)
   (command-line
     #:once-each
     [("--cycle") v "Number of cycles to simulate"

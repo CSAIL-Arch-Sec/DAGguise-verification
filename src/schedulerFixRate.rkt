@@ -40,8 +40,7 @@
 (define (set-scheduler! scheduler cycleForNext buf-valid buf-coreID buf-vertexID)
   (set-scheduler-cycleForNext! scheduler
     (list->vector
-      ;(map (lambda (i) (bitvector->natural i))
-      (map (lambda (i) 0)
+      (map (lambda (i) (bitvector->natural i))
            cycleForNext)))
 
   ; NOTE: because tag become useless after being pushed into bank buffer, set all tag to 0
@@ -49,8 +48,7 @@
     (list->vector
       (map (lambda (valid-multi coreID-multi vertexID-multi)
                    (filter (lambda (x) (not (void? x)))
-                      ;(map (lambda (valid coreID vertexID) (if valid (packet (bitvector->natural coreID) (bitvector->natural vertexID) 0 0) (void)))
-                      (map (lambda (valid coreID vertexID) (if #t (packet (bitvector->natural coreID) (bitvector->natural vertexID) 0 0) (void)))
+                      (map (lambda (valid coreID vertexID) (if valid (packet (bitvector->natural coreID) (bitvector->natural vertexID) 0 0) (void)))
                            valid-multi coreID-multi vertexID-multi)))
            buf-valid buf-coreID buf-vertexID)))
 )
@@ -131,15 +129,15 @@
 ; NOTE: when bus contention, we always give smaller tagID high priority
 (define (scheduler-resp scheduler)
   (define packet-canResp
-    (vector-filter (lambda (x) (not (void? x)))
-      (vector-map (lambda (buf cycleForNext) (if (&& (not (empty? buf)) (>= 0 cycleForNext))
+    (filter (lambda (x) (not (void? x)))
+      (map (lambda (buf cycleForNext) (if (&& (not (empty? buf)) (>= 0 cycleForNext))
                                                  (first buf)
                                                  (void)))
-                  (scheduler-buf scheduler) (scheduler-cycleForNext scheduler))))
+                  (vector->list (scheduler-buf scheduler)) (vector->list (scheduler-cycleForNext scheduler)))))
 
-  (if (vector-empty? packet-canResp)
+  (if (empty? packet-canResp)
     (list (void) (void))
-    (let ([packet (vector-ref packet-canResp 0)])
+    (let ([packet (first packet-canResp)])
       (cond
         [(equal? CORE_Shaper (packet-coreID packet)) (list packet (void))]
         [(equal? CORE_Rx (packet-coreID packet)) (list (void) packet)]
@@ -147,11 +145,15 @@
 )
 
 
+(error-print-width 1000000)
 (define (testMe)
-  (define scheduler (init-scheduler 2 1 1))
+  (define scheduler (init-scheduler 2 2 1))
+  (define-symbolic x1 x2 x3 x4 (bitvector 1))
   (set-scheduler! scheduler
-    (list (bv 1 1) (bv 1 1))
-    (list (list #t #f) (list #f #t))
+    ;(list (bv 0 1) (bv 1 1))
+    ;(list (bv 0 1) (bv 0 1))
+    (list (bv 0 1) x2)
+    (list (list #f #f) (list #t #t))
     (list (list (bv 0 1) (bv 0 1)) (list (bv 0 1) (bv 0 1)))
     (list (list (bv 0 1) (bv 0 1)) (list (bv 0 1) (bv 0 1))))
 
