@@ -1,17 +1,23 @@
 #!/usr/bin/env bash
 
+# STEP1 tools
 apt-get update
-add-apt-repository ppa:apt-fast/stable
-apt-get update
-DEBIAN_FRONTEND=noninteractive apt-get -y install apt-fast
-sh -c 'echo debconf apt-fast/maxdownloads string 32 | debconf-set-selections'
-sh -c 'echo debconf apt-fast/dlflag boolean true | debconf-set-selections'
-sh -c 'echo debconf apt-fast/aptmanager string apt-get | debconf-set-selections'
+apt-get install -y firefox graphviz make python3-pip
 
-add-apt-repository ppa:plt/racket
-apt-get update
-apt-fast -y install racket firefox graphviz
-#raco pkg install --auto rosette  # DO this manually in user space
-
-apt-fast -y install make python3-pip
+# STEP2 dask
+# dask for batch experiments during develop to find the "k" used in k-indectuion
+# can skip in final version since we already know the "k"
 python3 -m pip install "dask[complete]"
+
+# STEP3 racket8.3
+wget https://download.racket-lang.org/installers/8.3/racket-8.3-x86_64-linux-cs.sh
+bash racket-8.3-x86_64-linux-cs.sh --in-place --dest /usr/racket
+rm racket-8.3-x86_64-linux-cs.sh
+echo "export PATH=/usr/racket/bin:\$PATH" >> /home/vagrant/.bashrc
+
+# STEP4 rosette4.0
+git clone https://github.com/emina/rosette.git
+cd rosette && git checkout 4.0 && cd ..
+/usr/racket/bin/raco pkg install --no-docs --copy --auto -i -t dir rosette
+rm -rf rosette
+
