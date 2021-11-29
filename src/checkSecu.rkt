@@ -166,7 +166,7 @@
   (define TAG_SIZE 1) (define INTERVAL_SIZE_SHAPER 2) (define INTERVAL_SIZE_SCHEDULER 1)
   (define VERTEXID_SIZE 4) (define BUF_SIZE_DAG 1) (define BUF_SIZE_SCHEDULER 1)
 
-  (define arg-cycle 4)
+  (define arg-cycle 6)
   (command-line
     #:once-each
     [("--cycle") v "Number of cycles to simulate"
