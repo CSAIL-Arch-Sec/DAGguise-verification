@@ -91,7 +91,7 @@
 
 
 (define (testMe)
-  (define state (concrete:init-state 3 3 3 6))
+  (define state (init-state 3 3 3 6))
   (simu state 100))
 
 ;(testMe)

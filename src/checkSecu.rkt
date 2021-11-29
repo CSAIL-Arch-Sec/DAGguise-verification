@@ -9,13 +9,13 @@
   ; symbolic: whether Tx/Rx send req at each cycle, and the tag
   (define-symbolic sec1 sec2 recv (bitvector (* (+ 1 TAG_SIZE) MAXCLK)))
   
-  (define state1 (concrete:init-state
+  (define state1 (init-state
     (sym:init-dagState sec1 CORE_Shaper 0 TAG_SIZE)
     (fixRate:init-dagState CORE_Shaper (- (expt 2 INTERVAL_SIZE_SHAPER) 1) TAG_SIZE)
     (sym:init-dagState recv CORE_Rx (+ 1 MAXCLK) TAG_SIZE)
     (fixRate:init-scheduler (- (expt 2 INTERVAL_SIZE_SCHEDULER) 1) (+ 1 MAXCLK) TAG_SIZE)
   ))
-  (define state2 (concrete:init-state
+  (define state2 (init-state
     (sym:init-dagState sec2 CORE_Shaper 0 TAG_SIZE)
     (fixRate:init-dagState CORE_Shaper (- (expt 2 INTERVAL_SIZE_SHAPER) 1) TAG_SIZE)
     (sym:init-dagState recv CORE_Rx (+ 1 MAXCLK) TAG_SIZE)
@@ -47,13 +47,13 @@
   ; symbolic: whether Tx/Rx send req at each cycle, and the tag
   (define-symbolic sec1 sec2 recv (bitvector (* (+ 1 TAG_SIZE) (+ 1 MAXCLK))))
   
-  (define state1 (concrete:init-state
+  (define state1 (init-state
     (sym:init-dagState sec1 CORE_Shaper 0 TAG_SIZE)
     (fixRate:init-dagState CORE_Shaper (- (expt 2 INTERVAL_SIZE_SHAPER) 1) TAG_SIZE)
     (sym:init-dagState recv CORE_Rx 2 TAG_SIZE)
     (fixRate:init-scheduler (- (expt 2 INTERVAL_SIZE_SCHEDULER) 1) 2 TAG_SIZE)
   ))
-  (define state2 (concrete:init-state
+  (define state2 (init-state
     (sym:init-dagState sec2 CORE_Shaper 0 TAG_SIZE)
     (fixRate:init-dagState CORE_Shaper (- (expt 2 INTERVAL_SIZE_SHAPER) 1) TAG_SIZE)
     (sym:init-dagState recv CORE_Rx 2 TAG_SIZE)
@@ -166,7 +166,7 @@
   (define TAG_SIZE 1) (define INTERVAL_SIZE_SHAPER 2) (define INTERVAL_SIZE_SCHEDULER 1)
   (define VERTEXID_SIZE 4) (define BUF_SIZE_DAG 1) (define BUF_SIZE_SCHEDULER 1)
 
-  (define arg-cycle 6)
+  (define arg-cycle 4)
   (command-line
     #:once-each
     [("--cycle") v "Number of cycles to simulate"
