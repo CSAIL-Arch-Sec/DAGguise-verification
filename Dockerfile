@@ -7,7 +7,9 @@ RUN apt update && \
     wget \
     curl \
     ca-certificates \
-    vim
+    vim \
+    graphviz \
+    make
 
 # STEP2 racket8.3
 RUN wget https://download.racket-lang.org/installers/8.3/racket-8.3-x86_64-linux-cs.sh && \

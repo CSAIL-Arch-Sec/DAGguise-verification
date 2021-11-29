@@ -1,13 +1,15 @@
 
-.PHONY: verify debug perf
+.PHONY: verify debug perf doc
 
 
 verify:
-	raco test ++args "--hist 5 --cycle 5" src/checkSecu.rkt
+	raco test ++arg --cycle ++arg 3 src/checkSecu.rkt
 
+# NOTE: need web brower
 debug:
 	raco symtrace src/checkSecu.rkt
 
+# NOTE: need web brower
 perf:
 	raco symprofile src/checkSecu.rkt
 
