@@ -15,4 +15,5 @@ perf:
 
 doc: doc/fileHierarchy.gv
 	dot -Tpdf doc/fileHierarchy.gv -o doc/fileHierarchy.pdf
+	dot -Tpng doc/fileHierarchy.gv -o doc/fileHierarchy.png
 

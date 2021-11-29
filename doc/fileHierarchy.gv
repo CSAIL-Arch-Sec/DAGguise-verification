@@ -9,14 +9,18 @@ digraph G {
 
   "packet" -> "buffer";
   "packet" -> "dagStateFixRate";
+  "packet" -> "dagStateSym";
   "packet" -> "dagStateUninter";
   "packet" -> "schedulerFixRate";
+  "packet" -> "schedulerFixRateVec";
   "packet" -> "schedulerUninter";
 
   "schedulerFixRate" -> "scheduler";
+  "schedulerFixRateVec" -> "scheduler";
   "schedulerUninter" -> "scheduler";
 
   "dagStateFixRate" -> "dagState";
+  "dagStateSym" -> "dagState";
   "dagStateUninter" -> "dagState";
   
 
