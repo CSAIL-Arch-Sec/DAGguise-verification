@@ -7,7 +7,7 @@
   
   (all-from-out "state.rkt"))
 
-(error-print-width 1000000)
+;(error-print-width 1000000)
 
 (define DEBUG_SYMOPT #f)
 

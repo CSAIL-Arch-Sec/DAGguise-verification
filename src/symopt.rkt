@@ -4,6 +4,10 @@
 (require rosette/base/core/polymorphic)
 
 (define USE_SYMOPT #f)
+; TODO: Currently symbolic expression optimization does not work
+;       But we currently do not have performance issues anyway
+; NOTE: this function need to modify source code of rosette:
+;       enable set-union-contents! in `share/pkgs/rosette/rosette/base/core/union.rkt`
 
 
 (define (expr-simple expr printDebug)

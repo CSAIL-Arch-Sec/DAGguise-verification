@@ -145,7 +145,7 @@
 )
 
 
-(error-print-width 1000000)
+;(error-print-width 1000000)
 (define (testMe)
   (define scheduler (init-scheduler 2 2 1))
   (define-symbolic x1 x2 x3 x4 (bitvector 1))
