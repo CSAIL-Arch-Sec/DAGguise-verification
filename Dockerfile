@@ -1,4 +1,4 @@
-FROM ubuntu:focal
+FROM ubuntu:18.04
 
 # STEP1 tools
 RUN apt update && \
