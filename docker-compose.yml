@@ -1,9 +1,9 @@
 version: "3"
 services:
-  dagguise-formal:
+  dagguise-verification:
     build: .
     volumes:
-      - .:/DAGguise-noninterference
+      - .:/DAGguise-verification
     stdin_open: true # docker run -i
     tty: true        # docker run -t
 

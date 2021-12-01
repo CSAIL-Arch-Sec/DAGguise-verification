@@ -8,7 +8,7 @@ You can either use Docker or Vagrant+VirtualBox.
 For docker:
 
   1. Run `docker-compose up -d` to build up the container.
-  2. Run `docker-compose exec dagguise-formal bash` to login to the container.
+  2. Run `docker-compose exec dagguise-verification bash` to login to the container.
   3. Run `docker-compose down --rmi all` to clean up. (`docker system prune` can further clean up the cache, including your cache for other projects.)
 
 For Vagrant+VirtualBox:
@@ -22,7 +22,7 @@ For Vagrant+VirtualBox:
 
 In the container or virtual machine:
 
-  1. `cd /DAGguise-noninterference`
+  1. `cd /DAGguise-verification`
   2. `raco test src/checkSecu.rkt`
 
 Further more, you can try
