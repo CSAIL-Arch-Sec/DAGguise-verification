@@ -4,6 +4,10 @@
 
 (define (checkSecu_init MAXCLK TAG_SIZE INTERVAL_SIZE_SHAPER INTERVAL_SIZE_SCHEDULER)
 
+  (println "*************************")
+  (println "**** Base Step Start ****")
+  (println "*************************")
+
   ; STEP1: init the state
   ; concrete: shaper, scheduler
   ; symbolic: whether Tx/Rx send req at each cycle, and the tag
@@ -36,11 +40,21 @@
     (verify (assert (&& (equal? (dagState-respHistory (state-dagState_Rx state1)) (dagState-respHistory (state-dagState_Rx state2)))
                         (equal? (scheduler-reqHistory (state-scheduler state1)) (scheduler-reqHistory (state-scheduler state2))))))
   )
+  ;(print "Time for SMT solver: ") (print (/ (- (current-seconds) startTime) 60.0)) (println "min")
+
+
+  (println "****************************")
+  (println "**** Base Step Finished ****")
   (println sol)
-  (print "Time for SMT solver: ") (print (/ (- (current-seconds) startTime) 60.0)) (println "min")
+  (println "****************************")
+  (printf "\n\n")
 )
 
 (define (checkSecu_induct MAXCLK TAG_SIZE INTERVAL_SIZE_SHAPER INTERVAL_SIZE_SCHEDULER VERTEXID_SIZE BUF_SIZE_DAG BUF_SIZE_SCHEDULER)
+
+  (println "******************************")
+  (println "**** Induction Step Start ****")
+  (println "******************************")
 
   ; STEP1: init the state
   ; concrete: shaper, scheduler
@@ -127,6 +141,11 @@
     (verify (assert (&& (equal? (dagState-respHistory (state-dagState_Rx state1)) (dagState-respHistory (state-dagState_Rx state2)))
                         (equal? (scheduler-reqHistory (state-scheduler state1)) (scheduler-reqHistory (state-scheduler state2))))))
   )
+  ;(print "Time for SMT solver: ") (print (/ (- (current-seconds) startTime) 60.0)) (println "min")
+
+
+  (println "*********************************")
+  (println "**** Induction Step Finished ****")
   (println sol)
 
   (when (sat? sol)
@@ -148,7 +167,7 @@
     (println "vs")
     (println (evaluate state2 sol))
   )
-  (print "Time for SMT solver: ") (print (/ (- (current-seconds) startTime) 60.0)) (println "min")
+  (println "*********************************")
 )
 
 
@@ -172,7 +191,7 @@
     [("--cycle") v "Number of cycles to simulate"
                    (set! arg-cycle (string->number v))]
   )
-  (print "Run with args: --cycle:") (print arg-cycle)
+  (print "Run with args: --cycle:") (println arg-cycle)
   
   (checkSecu_init arg-cycle TAG_SIZE INTERVAL_SIZE_SHAPER INTERVAL_SIZE_SCHEDULER)
   (checkSecu_induct arg-cycle TAG_SIZE INTERVAL_SIZE_SHAPER INTERVAL_SIZE_SCHEDULER VERTEXID_SIZE BUF_SIZE_DAG BUF_SIZE_SCHEDULER)

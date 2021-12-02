@@ -83,7 +83,8 @@
   (incClkFor-scheduler! scheduler)
 
   ; recursive next cycle
-  (print "Time for state-") (print (state-clk state)) (print ": ") (print (/ (- (current-seconds) startTime) 60.0)) (println "min")
+  ;(print "Time for state-") (print (state-clk state)) (print ": ") (print (/ (- (current-seconds) startTime) 60.0)) (println "min")
+  (printf "Simu Cycle-") (print (state-clk state)) (printf "\n")
   ;(println state)
   ;(println "scheduler")
   ;(println scheduler)
